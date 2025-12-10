@@ -1,9 +1,11 @@
 
 # Privacy Policy for SOFAST Global
 
-**Last Updated:** [Current Date]
+**Last Updated:** January 2025
 
 **Team SOFAST LLC** ("we," "our," or "us") operates the SOFAST Global mobile application (the "App"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our App.
+
+**Website:** https://tmsofast.com
 
 ## 1. Information We Collect
 
@@ -61,8 +63,8 @@ We may share your information with:
 
 ### Third-Party Services We Use:
 - **Apple In-App Purchases:** For subscription processing
-- **RevenueCat (if applicable):** For subscription management
-- **Firebase (if applicable):** For data storage and analytics
+- **RevenueCat:** For subscription management
+- **Firebase:** For data storage and analytics
 
 ## 5. Your Privacy Rights
 
@@ -73,7 +75,7 @@ You have the right to:
 - **Opt-Out:** Disable leaderboard participation or data syncing
 - **Data Portability:** Export your performance data
 
-To exercise these rights, contact us at [your-email@example.com]
+To exercise these rights, contact us at support@tmsofast.com or visit https://tmsofast.com
 
 ## 6. Children's Privacy
 
@@ -133,8 +135,8 @@ If you are a California resident, you have additional rights under the Californi
 If you have questions about this Privacy Policy or our privacy practices, please contact us:
 
 **Team SOFAST LLC**
-Email: [your-email@example.com]
-Website: [your-website.com]
+Email: support@tmsofast.com
+Website: https://tmsofast.com
 
 ---
 
@@ -153,3 +155,5 @@ Website: [your-website.com]
 ---
 
 **By using SOFAST Global, you agree to this Privacy Policy.**
+
+For more information, visit https://tmsofast.com

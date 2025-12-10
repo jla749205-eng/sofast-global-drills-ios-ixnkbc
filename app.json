@@ -70,7 +70,9 @@
       "router": {},
       "eas": {
         "projectId": "YOUR_EAS_PROJECT_ID"
-      }
+      },
+      "privacyPolicyUrl": "https://tmsofast.com/privacy",
+      "websiteUrl": "https://tmsofast.com"
     }
   }
 }

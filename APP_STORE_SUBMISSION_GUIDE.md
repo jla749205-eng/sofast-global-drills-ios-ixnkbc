@@ -109,6 +109,8 @@ SUBSCRIPTION:
 • Premium ($4.99/month): Unlock all 10 drills + veteran badge
 
 Perfect for USPSA, IDPA, and competitive shooting enthusiasts!
+
+For more information, visit https://tmsofast.com
 ```
 
 #### Keywords (100 characters max)
@@ -137,22 +139,11 @@ You MUST have a privacy policy URL since your app:
 - Collects performance data
 - Has subscriptions
 
-**What to include:**
-- What data you collect (camera/mic/motion for drill analysis)
-- How you use it (performance tracking, leaderboards)
-- Data storage (local device, cloud sync)
-- Third-party services (RevenueCat for subscriptions)
-- User rights (data deletion, access)
+**Your Privacy Policy URL:** https://tmsofast.com/privacy
 
-**Free privacy policy generators:**
-- https://www.privacypolicies.com/
-- https://www.freeprivacypolicy.com/
-- https://app-privacy-policy-generator.firebaseapp.com/
+Make sure to host your privacy policy at this URL. The privacy policy content is available in `PRIVACY_POLICY_TEMPLATE.md` in your project.
 
-Host it on:
-- Your website
-- GitHub Pages
-- Notion (public page)
+**Important:** Upload the privacy policy to your website (https://tmsofast.com/privacy) before submitting to the App Store.
 
 ### STEP 9: App Review Information
 
@@ -160,7 +151,7 @@ Host it on:
 - First Name: [Your name]
 - Last Name: [Your name]
 - Phone: [Your phone]
-- Email: [Your email]
+- Email: support@tmsofast.com
 
 **Demo Account (if needed):**
 Since your app requires shooting drills, you might want to provide:
@@ -184,6 +175,9 @@ NOTE: The app can be tested without actual firearms by making loud sounds
 
 The app includes a freemium model with 3 free drills and a $4.99/month 
 subscription for full access.
+
+Website: https://tmsofast.com
+Privacy Policy: https://tmsofast.com/privacy
 ```
 
 ### STEP 10: Build Your App for iOS
@@ -227,8 +221,8 @@ eas submit --platform ios --latest
    - Screenshots
    - Description
    - Keywords
-   - Support URL
-   - Privacy Policy URL
+   - Support URL: https://tmsofast.com
+   - Privacy Policy URL: https://tmsofast.com/privacy
    - Age Rating (17+ for firearms content)
 5. Click "Submit for Review"
 
@@ -287,7 +281,7 @@ Once approved:
 
 ### Marketing
 - Share on social media
-- Create a landing page
+- Create a landing page at https://tmsofast.com
 - Reach out to shooting communities
 - Submit to app review sites
 
@@ -327,6 +321,7 @@ eas build --platform ios --profile production --auto-submit
 - **EAS Submit Docs:** https://docs.expo.dev/submit/introduction/
 - **App Store Review Guidelines:** https://developer.apple.com/app-store/review/guidelines/
 - **App Store Connect Help:** https://developer.apple.com/support/app-store-connect/
+- **SOFAST Global Website:** https://tmsofast.com
 
 ---
 
@@ -334,7 +329,7 @@ eas build --platform ios --profile production --auto-submit
 
 - **Apple Developer Program:** $99/year
 - **EAS Build (Expo):** Free tier available, or $29/month for unlimited builds
-- **Hosting (if needed):** $0-10/month for privacy policy page
+- **Hosting (if needed):** $0-10/month for website and privacy policy page
 
 ---
 
@@ -355,6 +350,26 @@ eas build --platform ios --profile production --auto-submit
 5. **RevenueCat:** If you're using RevenueCat for subscriptions, make sure to 
    configure it properly with your App Store Connect credentials.
 
+6. **Privacy Policy:** Make sure your privacy policy is live at https://tmsofast.com/privacy 
+   before submitting to the App Store. Apple will check this URL.
+
+---
+
+## 🌐 Website Setup
+
+Before submitting to the App Store, make sure your website (https://tmsofast.com) includes:
+
+1. **Home Page:** Brief description of SOFAST Global app
+2. **Privacy Policy:** Located at https://tmsofast.com/privacy (use PRIVACY_POLICY_TEMPLATE.md)
+3. **Support Page:** Contact information and FAQs
+4. **Terms of Service:** (optional but recommended)
+
+You can use simple hosting services like:
+- GitHub Pages (free)
+- Netlify (free)
+- Vercel (free)
+- WordPress (free/paid)
+
 ---
 
 ## 🎯 Quick Start (TL;DR)
@@ -372,18 +387,27 @@ eas build:configure
 # 4. Create app in App Store Connect
 # Go to https://appstoreconnect.apple.com/
 
-# 5. Build for iOS
+# 5. Upload privacy policy to https://tmsofast.com/privacy
+
+# 6. Build for iOS
 eas build --platform ios --profile production
 
-# 6. Submit to App Store
+# 7. Submit to App Store
 eas submit --platform ios --latest
 
-# 7. Complete listing in App Store Connect
-# 8. Submit for review
-# 9. Wait for approval
-# 10. Release!
+# 8. Complete listing in App Store Connect
+# - Add screenshots
+# - Add description
+# - Add privacy policy URL: https://tmsofast.com/privacy
+# - Add support URL: https://tmsofast.com
+
+# 9. Submit for review
+# 10. Wait for approval
+# 11. Release!
 ```
 
 ---
 
 Good luck with your App Store submission! 🚀
+
+For questions or support, visit https://tmsofast.com
