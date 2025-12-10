@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Image, Alert } from 'react-native';
 import { colors } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
+import * as Linking from 'expo-linking';
 
 type Division = 'Open' | 'Vet' | 'LE';
 
@@ -19,6 +20,24 @@ export default function LeaderboardScreen() {
     { rank: 4, name: 'Sarah Williams', score: 92.5, time: 8.89, isVeteran: false },
     { rank: 5, name: 'Tom Brown', score: 91.3, time: 9.12, isVeteran: true },
   ];
+
+  const handleInstagramPress = async () => {
+    const instagramUsername = 'team_sofast';
+    const instagramAppUrl = `instagram://user?username=${instagramUsername}`;
+    const instagramWebUrl = `https://www.instagram.com/${instagramUsername}`;
+
+    try {
+      const canOpen = await Linking.canOpenURL(instagramAppUrl);
+      if (canOpen) {
+        await Linking.openURL(instagramAppUrl);
+      } else {
+        await Linking.openURL(instagramWebUrl);
+      }
+    } catch (error) {
+      console.log('Error opening Instagram:', error);
+      Alert.alert('Error', 'Could not open Instagram. Please try again later.');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -60,6 +79,38 @@ export default function LeaderboardScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Social Media Section */}
+        <View style={styles.socialSection}>
+          <Text style={styles.sectionTitle}>JOIN OUR COMMUNITY</Text>
+          <TouchableOpacity
+            style={styles.socialCard}
+            onPress={handleInstagramPress}
+            activeOpacity={0.7}
+          >
+            <View style={styles.socialIconContainer}>
+              <IconSymbol
+                ios_icon_name="camera.fill"
+                android_material_icon_name="photo_camera"
+                size={32}
+                color={colors.accent}
+              />
+            </View>
+            <View style={styles.socialContent}>
+              <Text style={styles.socialTitle}>Follow us on Instagram</Text>
+              <Text style={styles.socialHandle}>@team_sofast</Text>
+              <Text style={styles.socialDescription}>
+                Get training tips, competition updates, and connect with the SOFAST community
+              </Text>
+            </View>
+            <IconSymbol
+              ios_icon_name="chevron.right"
+              android_material_icon_name="chevron_right"
+              size={24}
+              color={colors.textSecondary}
+            />
+          </TouchableOpacity>
+        </View>
+
         {/* Coming Soon Notice */}
         <View style={styles.comingSoonCard}>
           <IconSymbol
@@ -254,6 +305,51 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
+  },
+  socialSection: {
+    marginBottom: 24,
+  },
+  socialCard: {
+    flexDirection: 'row',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    gap: 16,
+    borderWidth: 2,
+    borderColor: colors.accent,
+    boxShadow: '0px 4px 8px rgba(163, 230, 53, 0.2)',
+    elevation: 4,
+  },
+  socialIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: colors.accent,
+  },
+  socialContent: {
+    flex: 1,
+  },
+  socialTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 4,
+  },
+  socialHandle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: colors.accent,
+    marginBottom: 6,
+  },
+  socialDescription: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    lineHeight: 18,
   },
   comingSoonCard: {
     backgroundColor: colors.card,
