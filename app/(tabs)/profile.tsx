@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Image } from 'react-native';
 import { colors } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
 
@@ -22,8 +22,13 @@ export default function LeaderboardScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* Header with Logo */}
       <View style={styles.header}>
+        <Image
+          source={require('@/assets/images/7cadd481-5bea-470d-802a-1f44d5a96178.jpeg')}
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
         <Text style={styles.headerTitle}>Global Leaderboard</Text>
         <Text style={styles.headerSubtitle}>Compete with shooters worldwide</Text>
       </View>
@@ -199,6 +204,14 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary,
+  },
+  logoImage: {
+    width: 60,
+    height: 60,
+    marginBottom: 12,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: colors.primary,
   },
   headerTitle: {
     fontSize: 24,

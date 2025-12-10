@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Alert, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '@/styles/commonStyles';
 import { DRILLS } from '@/data/drills';
@@ -149,10 +149,15 @@ export default function HomeScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
+        {/* Header with Logo */}
         <View style={styles.header}>
-          <Text style={styles.logo}>SOFAST</Text>
-          <Text style={styles.subtitle}>Global Marksmanship Drills</Text>
+          <Image
+            source={require('@/assets/images/7cadd481-5bea-470d-802a-1f44d5a96178.jpeg')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+          <Text style={styles.logo}>SOFAST Global</Text>
+          <Text style={styles.subtitle}>Marksmanship Competition Platform</Text>
           {isPremium && (
             <View style={styles.premiumBadgeLarge}>
               <IconSymbol
@@ -243,8 +248,16 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     paddingVertical: 20,
   },
+  logoImage: {
+    width: 100,
+    height: 100,
+    marginBottom: 16,
+    borderRadius: 50,
+    borderWidth: 3,
+    borderColor: colors.primary,
+  },
   logo: {
-    fontSize: 48,
+    fontSize: 36,
     fontWeight: '900',
     color: colors.primary,
     letterSpacing: 2,
@@ -253,11 +266,12 @@ const styles = StyleSheet.create({
     textShadowRadius: 8,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     color: colors.textSecondary,
-    letterSpacing: 3,
+    letterSpacing: 2,
     marginTop: 4,
+    textAlign: 'center',
   },
   premiumBadgeLarge: {
     flexDirection: 'row',
