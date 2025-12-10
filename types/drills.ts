@@ -21,6 +21,16 @@ export interface DrillResult {
   score: number;
   division: 'Open' | 'Vet' | 'LE';
   flinchDetected: boolean;
+  targetAnalysis?: {
+    totalPoints: number;
+    accuracy: number;
+    alphaHits: number;
+    charlieHits: number;
+    deltaHits: number;
+    targetType: 'USPSA' | 'IDPA';
+  };
+  classification?: string;
+  hitFactor?: number;
 }
 
 export interface LeaderboardEntry {

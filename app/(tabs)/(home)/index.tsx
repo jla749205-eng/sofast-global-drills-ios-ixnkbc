@@ -202,6 +202,34 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {/* Rankings Button */}
+        <TouchableOpacity
+          style={styles.rankingsButton}
+          onPress={() => router.push('/rankings/')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.rankingsButtonContent}>
+            <IconSymbol
+              ios_icon_name="chart.bar.fill"
+              android_material_icon_name="leaderboard"
+              size={32}
+              color={colors.primary}
+            />
+            <View style={styles.rankingsButtonText}>
+              <Text style={styles.rankingsButtonTitle}>View Global Rankings</Text>
+              <Text style={styles.rankingsButtonSubtitle}>
+                Compare your classification with shooters worldwide
+              </Text>
+            </View>
+            <IconSymbol
+              ios_icon_name="chevron.right"
+              android_material_icon_name="chevron_right"
+              size={24}
+              color={colors.textSecondary}
+            />
+          </View>
+        </TouchableOpacity>
+
         {/* Free Drills Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>FREE DRILLS</Text>
@@ -310,6 +338,34 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.textSecondary,
     textAlign: 'center',
+  },
+  rankingsButton: {
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+  rankingsButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  rankingsButtonText: {
+    flex: 1,
+  },
+  rankingsButtonTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 4,
+  },
+  rankingsButtonSubtitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    lineHeight: 16,
   },
   section: {
     marginBottom: 32,

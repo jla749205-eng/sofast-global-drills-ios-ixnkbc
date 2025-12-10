@@ -7,15 +7,17 @@ import { getDrillById } from '@/data/drills';
 import { IconSymbol } from '@/components/IconSymbol';
 import { LeaderboardService, Division } from '@/services/leaderboardService';
 import { DrillResult } from '@/types/drills';
+import { TargetAnalyzer, TargetAnalysisResult } from '@/services/targetAnalyzer';
 
 export default function ResultsScreen() {
   const router = useRouter();
-  const { id, time, shots, splits, flinches } = useLocalSearchParams<{
+  const { id, time, shots, splits, flinches, targetAnalysis } = useLocalSearchParams<{
     id: string;
     time: string;
     shots: string;
     splits: string;
     flinches?: string;
+    targetAnalysis?: string;
   }>();
   
   const drill = getDrillById(id);
@@ -23,9 +25,12 @@ export default function ResultsScreen() {
   const shotCount = parseInt(shots || '0', 10);
   const splitTimes = splits ? JSON.parse(splits) : [];
   const flinchCount = parseInt(flinches || '0', 10);
+  const analysis: TargetAnalysisResult | null = targetAnalysis ? JSON.parse(targetAnalysis) : null;
   
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [classification, setClassification] = useState<string>('Novice');
+  const [hitFactor, setHitFactor] = useState<number>(0);
   
   const isPar = drill?.parTime ? totalTime <= drill.parTime : false;
   const averageSplit = splitTimes.length > 0 
@@ -35,31 +40,54 @@ export default function ResultsScreen() {
   const fastestSplit = splitTimes.length > 0 ? Math.min(...splitTimes) : 0;
   const slowestSplit = splitTimes.length > 0 ? Math.max(...splitTimes) : 0;
 
-  // Calculate score (simple scoring: 100 - time penalty - miss penalty - flinch penalty)
+  // Calculate score with target analysis
   const calculateScore = () => {
     let score = 100;
     
-    // Time penalty
-    if (drill?.parTime) {
-      const timeDiff = totalTime - drill.parTime;
-      if (timeDiff > 0) {
-        score -= timeDiff * 2; // -2 points per second over par
+    // If we have target analysis, use accuracy data
+    if (analysis) {
+      score = analysis.accuracy;
+    } else {
+      // Fallback to simple scoring
+      // Time penalty
+      if (drill?.parTime) {
+        const timeDiff = totalTime - drill.parTime;
+        if (timeDiff > 0) {
+          score -= timeDiff * 2; // -2 points per second over par
+        }
       }
+      
+      // Miss penalty
+      const expectedShots = drill?.rounds || shotCount;
+      if (shotCount < expectedShots) {
+        score -= (expectedShots - shotCount) * 5; // -5 points per missed shot
+      }
+      
+      // Flinch penalty
+      score -= flinchCount * 3; // -3 points per flinch
     }
-    
-    // Miss penalty
-    const expectedShots = drill?.rounds || shotCount;
-    if (shotCount < expectedShots) {
-      score -= (expectedShots - shotCount) * 5; // -5 points per missed shot
-    }
-    
-    // Flinch penalty
-    score -= flinchCount * 3; // -3 points per flinch
     
     return Math.max(0, Math.round(score));
   };
 
   const score = calculateScore();
+
+  // Calculate hit factor and classification
+  useEffect(() => {
+    const targetAnalyzer = TargetAnalyzer.getInstance();
+    
+    // Calculate hit factor: Points / Time
+    // Use target analysis points if available, otherwise use score
+    const points = analysis ? analysis.totalPoints : score;
+    const hf = totalTime > 0 ? points / totalTime : 0;
+    setHitFactor(hf);
+    
+    // Determine classification based on hit factor
+    const classif = targetAnalyzer.calculateUSPSAClassification(hf);
+    setClassification(classif);
+    
+    console.log(`Hit Factor: ${hf.toFixed(2)}, Classification: ${classif}`);
+  }, [analysis, score, totalTime]);
 
   const handleUploadScore = async () => {
     try {
@@ -76,6 +104,16 @@ export default function ResultsScreen() {
         score,
         division: 'Open', // TODO: Let user select division
         flinchDetected: flinchCount > 0,
+        classification,
+        hitFactor,
+        targetAnalysis: analysis ? {
+          totalPoints: analysis.totalPoints,
+          accuracy: analysis.accuracy,
+          alphaHits: analysis.alphaHits,
+          charlieHits: analysis.charlieHits,
+          deltaHits: analysis.deltaHits,
+          targetType: analysis.targetType,
+        } : undefined,
       };
 
       const leaderboardService = LeaderboardService.getInstance();
@@ -111,6 +149,15 @@ export default function ResultsScreen() {
     });
   };
 
+  const handleViewRankings = () => {
+    router.push('/rankings/');
+  };
+
+  const getClassificationColor = () => {
+    const targetAnalyzer = TargetAnalyzer.getInstance();
+    return targetAnalyzer.getClassificationColor(classification);
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -131,6 +178,18 @@ export default function ResultsScreen() {
           <Text style={styles.scoreLabel}>SCORE</Text>
           <Text style={styles.scoreValue}>{score}</Text>
           <Text style={styles.scoreMax}>/ 100</Text>
+        </View>
+
+        {/* Classification Badge */}
+        <View style={[styles.classificationBadge, { borderColor: getClassificationColor() }]}>
+          <View style={[styles.classificationDot, { backgroundColor: getClassificationColor() }]} />
+          <View style={styles.classificationInfo}>
+            <Text style={styles.classificationLabel}>YOUR CLASSIFICATION</Text>
+            <Text style={[styles.classificationValue, { color: getClassificationColor() }]}>
+              {classification}
+            </Text>
+            <Text style={styles.hitFactorText}>Hit Factor: {hitFactor.toFixed(2)}</Text>
+          </View>
         </View>
 
         {/* Main Stats */}
@@ -210,7 +269,7 @@ export default function ResultsScreen() {
                 size={32}
                 color={colors.primary}
               />
-              <Text style={styles.analysisTitle}>Shot Detection</Text>
+              <Text style={styles.analysisTitle}>Shot Detection & Accuracy</Text>
             </View>
             <View style={styles.analysisStats}>
               <View style={styles.analysisStatItem}>
@@ -242,10 +301,49 @@ export default function ResultsScreen() {
                 />
                 <Text style={styles.analysisStatText}>{shotCount} Shots Confirmed</Text>
               </View>
+              {analysis && (
+                <>
+                  <View style={styles.analysisStatItem}>
+                    <IconSymbol
+                      ios_icon_name="target"
+                      android_material_icon_name="gps_fixed"
+                      size={20}
+                      color={colors.primary}
+                    />
+                    <Text style={styles.analysisStatText}>
+                      Target Verified: {analysis.targetType}
+                    </Text>
+                  </View>
+                  <View style={styles.analysisStatItem}>
+                    <IconSymbol
+                      ios_icon_name="scope"
+                      android_material_icon_name="center_focus_strong"
+                      size={20}
+                      color={colors.primary}
+                    />
+                    <Text style={styles.analysisStatText}>
+                      A-Zone: {analysis.alphaHits} | C-Zone: {analysis.charlieHits} | D-Zone: {analysis.deltaHits}
+                    </Text>
+                  </View>
+                  <View style={styles.analysisStatItem}>
+                    <IconSymbol
+                      ios_icon_name="star.fill"
+                      android_material_icon_name="star"
+                      size={20}
+                      color={colors.accent}
+                    />
+                    <Text style={styles.analysisStatText}>
+                      Accuracy: {analysis.accuracy.toFixed(1)}%
+                    </Text>
+                  </View>
+                </>
+              )}
             </View>
-            <Text style={styles.analysisNote}>
-              Advanced muzzle flash detection and form analysis coming in future updates.
-            </Text>
+            {!analysis && (
+              <Text style={styles.analysisNote}>
+                Target photo not provided. Score based on timing only. Upload target photos for accurate classification and to compete in global rankings!
+              </Text>
+            )}
           </View>
         </View>
 
@@ -280,7 +378,21 @@ export default function ResultsScreen() {
               size={20}
               color={colors.accent}
             />
-            <Text style={styles.viewLeaderboardText}>View Leaderboard</Text>
+            <Text style={styles.viewLeaderboardText}>View Drill Leaderboard</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.viewRankingsButton}
+            onPress={handleViewRankings}
+            activeOpacity={0.8}
+          >
+            <IconSymbol
+              ios_icon_name="chart.bar.fill"
+              android_material_icon_name="leaderboard"
+              size={20}
+              color={colors.primary}
+            />
+            <Text style={styles.viewRankingsText}>View Global Rankings</Text>
           </TouchableOpacity>
         </View>
 
@@ -371,6 +483,42 @@ const styles = StyleSheet.create({
   },
   scoreMax: {
     fontSize: 16,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  classificationBadge: {
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 2,
+    marginBottom: 24,
+    gap: 12,
+    minWidth: 280,
+  },
+  classificationDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+  },
+  classificationInfo: {
+    flex: 1,
+  },
+  classificationLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: colors.textSecondary,
+    letterSpacing: 2,
+  },
+  classificationValue: {
+    fontSize: 24,
+    fontWeight: '900',
+    marginVertical: 2,
+  },
+  hitFactorText: {
+    fontSize: 12,
     fontWeight: '600',
     color: colors.textSecondary,
   },
@@ -564,6 +712,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.textSecondary,
+  },
+  viewRankingsButton: {
+    backgroundColor: colors.card,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    marginTop: 8,
+  },
+  viewRankingsText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.primary,
   },
   buttonContainer: {
     flexDirection: 'row',

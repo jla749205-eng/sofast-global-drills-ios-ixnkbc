@@ -216,9 +216,9 @@ export default function CameraScreen() {
         await cameraRef.current.stopRecording();
       }
       
-      // Navigate to results
+      // Navigate to target photo screen for accuracy verification
       router.push({
-        pathname: '/results/[id]',
+        pathname: '/target-photo/[id]',
         params: {
           id: drill?.id || '',
           time: elapsedTime.toFixed(2),
