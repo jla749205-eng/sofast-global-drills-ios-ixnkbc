@@ -1,159 +1,150 @@
 
-# Privacy Policy for SOFAST Global
+# Privacy Policy Template for SOFAST Global Drills
 
-**Last Updated:** January 2025
+**⚠️ IMPORTANT: This template must be hosted at https://tmsofast.com/privacy**
 
-**Team SOFAST LLC** ("we," "our," or "us") operates the SOFAST Global mobile application (the "App"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our App.
+---
 
-**Website:** https://tmsofast.com
+# Privacy Policy for SOFAST Global Drills
 
-## 1. Information We Collect
+**Last Updated: [INSERT DATE]**
 
-### 1.1 Information You Provide
-- **Account Information:** Email address, username, and password (if you create an account)
-- **Profile Information:** Display name, division selection (Open, Veteran, Law Enforcement)
-- **Payment Information:** Processed through Apple's In-App Purchase system (we do not store credit card information)
+## Introduction
 
-### 1.2 Information Collected Automatically
-- **Device Information:** Device model, operating system version, unique device identifiers
-- **Usage Data:** Drill performance data, scores, times, and statistics
-- **Camera Data:** Video recordings during drills (stored locally on your device, not transmitted to our servers unless you choose to share)
-- **Microphone Data:** Audio recordings for shot detection (processed locally, not stored or transmitted)
-- **Motion Sensor Data:** Accelerometer and gyroscope data for recoil detection (processed locally, not stored or transmitted)
+Team SOFAST LLC ("we," "our," or "us") operates the SOFAST Global Drills mobile application (the "App"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our App.
 
-### 1.3 Location Information
-We do not collect or track your location data.
+## Information We Collect
 
-## 2. How We Use Your Information
+### Information You Provide
+- **Account Information**: Username, email address (if you create an account)
+- **Performance Data**: Drill scores, times, and shooting performance metrics
+- **User Preferences**: App settings and preferences
 
-We use the information we collect to:
-- Provide and maintain the App's functionality
-- Process your drill recordings and provide performance analysis
-- Display your scores on global leaderboards (if you opt in)
-- Process subscription payments through Apple's In-App Purchase system
-- Send you important updates about the App
-- Improve and optimize the App's features
-- Respond to your support requests
+### Information Collected Automatically
+- **Device Information**: Device type, operating system, unique device identifiers
+- **Usage Data**: App features used, drill selections, session duration
+- **Performance Metrics**: Drill completion times, scores, and rankings
+- **Sensor Data**: Camera, microphone, and motion sensor data (only during active drill sessions)
 
-## 3. Data Storage and Security
+### Camera, Microphone, and Motion Sensors
+- **Camera**: Used to record shooting drills and detect muzzle flash
+- **Microphone**: Used to detect shot sounds and provide accurate timing
+- **Motion Sensors**: Used to detect recoil and analyze shooting form
+- **Storage**: Recordings are processed locally on your device and are not uploaded to our servers unless you explicitly choose to save and share results
 
-### 3.1 Local Storage
-- Video recordings of your drills are stored locally on your device
-- Audio and motion sensor data are processed in real-time and not permanently stored
-- Performance data (scores, times) is stored locally and optionally synced to our servers
+## How We Use Your Information
 
-### 3.2 Cloud Storage
-- If you enable cloud sync, your performance data is stored on secure servers
-- We use industry-standard encryption to protect your data in transit and at rest
-- We do not store video or audio recordings on our servers
+We use the collected information to:
+- Provide and maintain the App functionality
+- Calculate and display your drill performance and scores
+- Maintain global leaderboards and rankings
+- Improve and optimize the App experience
+- Process subscription payments
+- Send important updates and notifications
+- Respond to customer support requests
+- Comply with legal obligations
 
-### 3.3 Data Retention
-- Local data remains on your device until you delete the App
-- Cloud-synced data is retained while your account is active
-- You can request deletion of your data at any time
+## Data Sharing and Disclosure
 
-## 4. Data Sharing and Disclosure
+### Public Information
+- **Leaderboards**: Your username and scores may be visible on public leaderboards
+- **Rankings**: Your division ranking may be visible to other users
 
-We do not sell, trade, or rent your personal information to third parties.
+### Third-Party Services
+We use the following third-party services:
+- **RevenueCat**: For subscription management and payment processing
+- **Analytics Services**: For app performance and usage analytics (anonymized)
 
-We may share your information with:
-- **Service Providers:** Third-party services that help us operate the App (e.g., cloud hosting, analytics)
-- **Leaderboards:** Your username and scores are publicly visible on leaderboards (if you opt in)
-- **Legal Requirements:** If required by law or to protect our rights
+We do NOT sell your personal information to third parties.
 
-### Third-Party Services We Use:
-- **Apple In-App Purchases:** For subscription processing
-- **RevenueCat:** For subscription management
-- **Firebase:** For data storage and analytics
+### Legal Requirements
+We may disclose your information if required by law or in response to valid legal requests.
 
-## 5. Your Privacy Rights
+## Data Security
+
+We implement appropriate technical and organizational measures to protect your information, including:
+- Encryption of data in transit
+- Secure storage of user data
+- Regular security assessments
+- Limited access to personal information
+
+However, no method of transmission over the internet is 100% secure.
+
+## Your Rights and Choices
 
 You have the right to:
-- **Access:** Request a copy of your personal data
-- **Correction:** Update or correct your information
-- **Deletion:** Request deletion of your account and data
-- **Opt-Out:** Disable leaderboard participation or data syncing
-- **Data Portability:** Export your performance data
+- **Access**: Request a copy of your personal data
+- **Correction**: Request correction of inaccurate data
+- **Deletion**: Request deletion of your account and data
+- **Opt-Out**: Opt out of marketing communications
+- **Data Portability**: Request your data in a portable format
 
-To exercise these rights, contact us at support@tmsofast.com or visit https://tmsofast.com
+To exercise these rights, contact us at [YOUR SUPPORT EMAIL]
 
-## 6. Children's Privacy
+## Children's Privacy
 
-SOFAST Global is not intended for users under the age of 17. We do not knowingly collect personal information from children under 17. If you believe we have collected information from a child under 17, please contact us immediately.
+Our App is not intended for children under 13 (or 16 in some jurisdictions). We do not knowingly collect personal information from children. If you believe we have collected information from a child, please contact us immediately.
 
-## 7. Camera and Microphone Usage
+## Subscription and Payments
 
-### Camera
-- Used to record your shooting drills
-- Recordings are stored locally on your device
-- You can delete recordings at any time
-- We do not access or transmit your camera recordings without your explicit consent
+- Subscriptions are processed through Apple's App Store
+- Payment information is handled by Apple, not by us
+- We receive only subscription status information from Apple
+- Subscription terms: $4.99/month, auto-renewable
+- Cancel anytime through your Apple ID settings
 
-### Microphone
-- Used to detect shots through audio analysis
-- Audio is processed in real-time and not permanently stored
-- We do not record or transmit conversations or ambient audio
+## Data Retention
 
-### Motion Sensors
-- Used to detect recoil and analyze shooting form
-- Data is processed in real-time and not permanently stored
-- We do not track your physical movements outside of drill sessions
+We retain your information for as long as:
+- Your account is active
+- Needed to provide services
+- Required by law
+- Necessary for legitimate business purposes
 
-## 8. Subscription Information
+You may request deletion of your account at any time.
 
-- Subscriptions are processed through Apple's In-App Purchase system
-- Pricing: $4.99/month for premium access
-- Free tier includes 3 drills; premium unlocks all 10 drills
-- Subscriptions auto-renew unless canceled 24 hours before the renewal date
-- Manage subscriptions in your Apple ID settings
-- No refunds for partial subscription periods
+## International Data Transfers
 
-## 9. Changes to This Privacy Policy
+Your information may be transferred to and processed in countries other than your own. We ensure appropriate safeguards are in place for such transfers.
+
+## Changes to This Privacy Policy
 
 We may update this Privacy Policy from time to time. We will notify you of any changes by:
 - Posting the new Privacy Policy in the App
 - Updating the "Last Updated" date
-- Sending you a notification (for significant changes)
+- Sending you an email notification (for material changes)
 
-Your continued use of the App after changes constitutes acceptance of the updated Privacy Policy.
+## Contact Us
 
-## 10. International Users
-
-If you are accessing the App from outside the United States, please be aware that your information may be transferred to, stored, and processed in the United States where our servers are located.
-
-## 11. California Privacy Rights
-
-If you are a California resident, you have additional rights under the California Consumer Privacy Act (CCPA):
-- Right to know what personal information is collected
-- Right to know if personal information is sold or disclosed
-- Right to opt-out of the sale of personal information (we do not sell personal information)
-- Right to deletion of personal information
-- Right to non-discrimination for exercising your rights
-
-## 12. Contact Us
-
-If you have questions about this Privacy Policy or our privacy practices, please contact us:
+If you have questions about this Privacy Policy, please contact us:
 
 **Team SOFAST LLC**
-Email: support@tmsofast.com
-Website: https://tmsofast.com
+- Email: [YOUR SUPPORT EMAIL]
+- Website: https://tmsofast.com
+- Address: [YOUR BUSINESS ADDRESS]
+
+## App Store Privacy Information
+
+For Apple App Store privacy requirements, we collect and use:
+
+### Data Linked to You:
+- User ID
+- Performance data (scores, times)
+- Device ID (for rankings)
+
+### Data Not Linked to You:
+- Usage data (anonymized)
+- Diagnostics (crash reports)
+
+### Data Used for Tracking:
+- None (we do not track you across other apps or websites)
 
 ---
 
-## Summary of Data Collection
+## Consent
 
-| Data Type | Purpose | Storage | Sharing |
-|-----------|---------|---------|---------|
-| Email/Username | Account management | Cloud | No |
-| Video Recordings | Drill analysis | Local device only | No (unless you share) |
-| Audio | Shot detection | Processed in real-time, not stored | No |
-| Motion Sensors | Recoil detection | Processed in real-time, not stored | No |
-| Performance Data | Scores, leaderboards | Local + Cloud (optional) | Leaderboards only (opt-in) |
-| Device Info | App functionality | Local + Cloud | Service providers only |
-| Payment Info | Subscriptions | Apple's servers (not ours) | Apple only |
+By using SOFAST Global Drills, you consent to this Privacy Policy and agree to its terms.
 
 ---
 
-**By using SOFAST Global, you agree to this Privacy Policy.**
-
-For more information, visit https://tmsofast.com
+**© 2025 Team SOFAST LLC. All rights reserved.**

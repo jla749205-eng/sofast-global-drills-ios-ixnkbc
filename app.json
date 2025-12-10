@@ -1,7 +1,8 @@
+
 {
   "expo": {
     "name": "SOFAST Global Drills",
-    "slug": "SOFAST Global Drills",
+    "slug": "sofast-global-drills",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/7cadd481-5bea-470d-802a-1f44d5a96178.jpeg",
@@ -30,7 +31,12 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.teamsofast.sofastglobal",
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "VIBRATE"
+      ]
     },
     "web": {
       "favicon": "./assets/images/final_quest_240x240.png",
@@ -71,8 +77,8 @@
         "projectId": "YOUR_EAS_PROJECT_ID"
       },
       "privacyPolicyUrl": "https://tmsofast.com/privacy",
-      "websiteUrl": "https://tmsofast.com"
+      "websiteUrl": "https://tmsofast.com",
+      "supportUrl": "https://tmsofast.com/support"
     }
-  },
-  "scheme": "SOFAST Global Drills"
+  }
 }

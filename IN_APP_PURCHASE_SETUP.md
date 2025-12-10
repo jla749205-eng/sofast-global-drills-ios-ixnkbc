@@ -1,391 +1,305 @@
 
-# 🛒 Setting Up In-App Purchases for SOFAST Global
+# In-App Purchase Setup Guide
 
-Your app has a freemium model:
-- **Free:** 3 drills
-- **Premium:** $4.99/month - All 10 drills + veteran badge
-
-Here's how to set up the subscription in App Store Connect.
-
----
-
-## Step 1: Create In-App Purchase in App Store Connect
-
-1. Go to https://appstoreconnect.apple.com/
-2. Select your app "SOFAST Global"
-3. Click on "In-App Purchases" in the left sidebar
-4. Click the "+" button to create a new In-App Purchase
+## Overview
+SOFAST Global Drills uses a subscription model:
+- **Free**: 3 drills
+- **Premium**: $4.99/month - All 10 drills + veteran badge
 
 ---
 
-## Step 2: Choose Subscription Type
+## Step 1: Create Subscription in App Store Connect
 
-Select **"Auto-Renewable Subscription"**
-
-This allows users to subscribe monthly and auto-renew until they cancel.
-
----
-
-## Step 3: Create Subscription Group
-
-1. Click "Create Subscription Group"
-2. **Subscription Group Reference Name:** SOFAST Premium
-3. Click "Create"
+1. Go to https://appstoreconnect.apple.com
+2. Select your app: **SOFAST Global Drills**
+3. Go to **Features** → **In-App Purchases**
+4. Click **"+"** → **Auto-Renewable Subscription**
 
 ---
 
-## Step 4: Configure Subscription
+## Step 2: Create Subscription Group
 
-### Reference Name
-```
-SOFAST Premium Monthly
-```
+1. Click **"Create Subscription Group"**
+2. Fill in:
+   - **Reference Name**: Premium Access
+   - **App Name**: SOFAST Global Drills Premium
 
-### Product ID
-```
+---
+
+## Step 3: Configure Subscription
+
+### Basic Information:
+- **Reference Name**: Premium Monthly Subscription
+- **Product ID**: `com.teamsofast.sofastglobal.premium.monthly`
+- **Subscription Duration**: 1 Month (1 month)
+- **Subscription Prices**: $4.99 USD
+
+### Subscription Localizations:
+- **Display Name**: Premium Subscription
+- **Description**: 
+  ```
+  Unlock all 10 professional shooting drills, veteran badge recognition, and advanced analytics. 
+  Train like a pro with unlimited access to all features.
+  ```
+
+### Review Information:
+- **Screenshot**: Upload a screenshot showing premium features
+- **Review Notes**: 
+  ```
+  Premium subscription unlocks:
+  - All 10 professional drills
+  - Veteran badge
+  - Advanced analytics
+  - Priority support
+  
+  Test account: [provide test account if needed]
+  ```
+
+---
+
+## Step 4: Configure Subscription Details
+
+### Subscription Availability:
+- **Available in**: All territories
+- **Cleared for Sale**: Yes
+
+### Subscription Information:
+- **Subscription Group Display Name**: Premium Access
+- **Subscription Group Custom App Name**: SOFAST Global Drills Premium
+
+---
+
+## Step 5: Set Up Introductory Offers (Optional)
+
+Consider offering:
+- **Free Trial**: 7 days free
+- **Introductory Price**: $2.99 for first month
+- **Pay Up Front**: $49.99/year (save 17%)
+
+To add:
+1. Click **"Add Introductory Offer"**
+2. Select offer type
+3. Set duration and price
+
+---
+
+## Step 6: Configure Subscription Features
+
+### Family Sharing:
+- **Enable**: No (each user needs their own subscription)
+
+### Subscription Offers:
+- **Promotional Offers**: Set up codes for marketing
+- **Offer Codes**: Create codes for influencers/partners
+
+---
+
+## Step 7: Submit for Review
+
+1. Click **"Submit"** on the subscription
+2. Subscriptions are reviewed separately from the app
+3. Review time: 24-48 hours
+
+---
+
+## Step 8: Integrate RevenueCat (Already in Code)
+
+Your app already has subscription service setup in:
+- `services/subscriptionService.ts`
+
+### RevenueCat Configuration:
+1. Sign up at https://www.revenuecat.com
+2. Create a new project
+3. Add your app (Bundle ID: `com.teamsofast.sofastglobal`)
+4. Configure Apple App Store:
+   - Add App Store Connect API Key
+   - Add Shared Secret from App Store Connect
+5. Create Entitlement: `premium`
+6. Create Product: `com.teamsofast.sofastglobal.premium.monthly`
+7. Link product to entitlement
+
+### Get API Keys:
+- iOS API Key: Found in RevenueCat → Project Settings → API Keys
+- Add to your app's environment variables
+
+---
+
+## Step 9: Test Subscription
+
+### Sandbox Testing:
+1. Create sandbox test account in App Store Connect
+2. Go to **Users and Access** → **Sandbox Testers**
+3. Click **"+"** to add tester
+4. Use this account to test purchases in TestFlight
+
+### Test Scenarios:
+- ✅ Purchase subscription
+- ✅ Verify premium features unlock
+- ✅ Cancel subscription
+- ✅ Verify features lock after cancellation
+- ✅ Restore purchases
+- ✅ Test on different devices
+
+---
+
+## Step 10: Configure Subscription Management
+
+### In App Store Connect:
+1. Go to **App Information**
+2. Add **Subscription Management URL**: 
+   ```
+   https://apps.apple.com/account/subscriptions
+   ```
+
+### In Your App:
+Users can manage subscriptions through:
+- App Settings → Manage Subscription
+- Links to Apple's subscription management
+
+---
+
+## Subscription Product IDs
+
+Use these exact Product IDs:
+
+```typescript
+// Monthly subscription
 com.teamsofast.sofastglobal.premium.monthly
-```
-**Important:** This must match the product ID in your app code!
 
-### Subscription Duration
-```
-1 Month
-```
-
-### Subscription Prices
-1. Click "Add Subscription Price"
-2. Select your base country (e.g., United States)
-3. Enter price: **$4.99**
-4. Click "Next"
-5. Review prices for other countries (Apple auto-converts)
-6. Click "Create"
-
----
-
-## Step 5: Localization
-
-Add at least one localization (English - US):
-
-**Display Name:**
-```
-SOFAST Premium
-```
-
-**Description:**
-```
-Unlock all 10 professional shooting drills, global leaderboards, and exclusive veteran badge. Perfect for serious competitive shooters.
+// Optional: Annual subscription (better value)
+com.teamsofast.sofastglobal.premium.yearly
 ```
 
 ---
 
-## Step 6: Review Information
+## Pricing Recommendations
 
-### Screenshot for Review
-Upload a screenshot showing what users get with the subscription:
-- List of all 10 drills
-- Leaderboard access
-- Veteran badge
+### Monthly:
+- **$4.99/month** - Current plan ✅
 
-### Review Notes
-```
-This subscription unlocks all premium features in SOFAST Global:
-- Access to all 10 shooting drills (free users get 3)
-- Global leaderboard participation
-- Veteran badge for profile
+### Annual (Optional):
+- **$49.99/year** - Save $9.89 (17% off)
+- Better retention and revenue
 
-The subscription can be tested using a sandbox test account.
-```
+### Lifetime (Optional):
+- **$99.99** - One-time purchase
+- Good for dedicated users
 
 ---
 
-## Step 7: App Store Information
+## Marketing Copy for Subscription
 
-### Subscription Display Name
+### Short Description:
 ```
-SOFAST Premium
-```
-
-### Description
-```
-Unlock all 10 professional shooting drills, compete on global leaderboards, and earn your veteran badge. Train like a pro with unlimited access to El Presidente, Mozambique, Bill Drill, FAST, and more.
+Unlock all 10 drills, veteran badge, and advanced features for $4.99/month
 ```
 
-### Features (bullet points)
+### Full Description:
 ```
-• All 10 Professional Drills
-• Global Leaderboard Access
-• Veteran Badge
-• Unlimited Practice Sessions
-• Advanced Performance Analytics
-• Priority Support
+PREMIUM FEATURES:
+✓ All 10 Professional Drills
+✓ Veteran Badge Recognition
+✓ Advanced Performance Analytics
+✓ Detailed Shot Analysis
+✓ Priority Customer Support
+✓ Early Access to New Features
+
+FREE FEATURES:
+• 3 Training Drills
+• Basic Performance Tracking
+• Global Leaderboards
+
+Try 7 days free, then $4.99/month. Cancel anytime.
 ```
 
 ---
 
-## Step 8: Subscription Benefits (Optional)
+## App Store Review Notes
 
-You can add promotional images and benefits that appear in the App Store:
+Include this in your App Store submission:
 
-1. **Benefit 1:** "Access All Drills"
-2. **Benefit 2:** "Compete Globally"
-3. **Benefit 3:** "Track Your Progress"
-
----
-
-## Step 9: Free Trial (Optional)
-
-You can offer a free trial:
-
-1. Click "Add Free Trial"
-2. Select duration: 7 days (recommended)
-3. Users get full access for 7 days before being charged
-
-**Pros:**
-- Higher conversion rate
-- Users can try before buying
-
-**Cons:**
-- Some users may cancel before being charged
-
----
-
-## Step 10: Introductory Offer (Optional)
-
-You can offer a discounted first month:
-
-Example: **$0.99 for the first month, then $4.99/month**
-
-1. Click "Add Introductory Offer"
-2. Select "Pay As You Go"
-3. Duration: 1 month
-4. Price: $0.99
-
----
-
-## Step 11: Promotional Offers (Optional)
-
-Create offers for:
-- Win-back (users who canceled)
-- Upgrade (free users)
-- Retention (existing subscribers)
-
-Example: **"Get 1 month free - Limited time offer!"**
-
----
-
-## Step 12: Submit for Review
-
-1. Click "Submit" on your In-App Purchase
-2. It will be reviewed along with your app
-3. Approval usually takes 24-48 hours
-
----
-
-## Step 13: Testing with Sandbox
-
-### Create Sandbox Test Account
-
-1. Go to App Store Connect
-2. Click "Users and Access"
-3. Click "Sandbox Testers"
-4. Click "+" to add a tester
-5. Fill in details:
-   - Email: test@example.com (use a unique email)
-   - Password: TestPass123!
-   - First/Last Name: Test User
-   - Country: United States
-
-### Test on Device
-
-1. Sign out of your real Apple ID on your test device
-2. Install your app via TestFlight or development build
-3. Try to purchase the subscription
-4. Sign in with your sandbox test account when prompted
-5. The purchase will be simulated (no real charge)
-6. Verify that premium features unlock
-
-**Sandbox Testing Tips:**
-- Subscriptions renew every 5 minutes (not monthly) for testing
-- You can cancel and resubscribe multiple times
-- Receipts are generated for validation
-
----
-
-## Step 14: Implement in Your App
-
-You'll need to add code to handle the subscription. Here's the product ID to use:
-
-```typescript
-const PREMIUM_PRODUCT_ID = 'com.teamsofast.sofastglobal.premium.monthly';
 ```
+SUBSCRIPTION INFORMATION:
+- Product: Premium Monthly Subscription
+- Price: $4.99 USD/month
+- Features: Unlocks 7 additional drills (10 total), veteran badge, and advanced analytics
+- Free version: 3 drills available without subscription
+- Subscription managed through Apple's subscription system
+- Users can cancel anytime through iOS Settings
 
-### Using RevenueCat (Recommended)
-
-RevenueCat simplifies subscription management:
-
-1. Sign up at https://www.revenuecat.com/
-2. Create a project
-3. Add your App Store Connect credentials
-4. Configure your product ID
-5. Integrate RevenueCat SDK in your app
-
-### Using Native StoreKit
-
-If you prefer native implementation:
-- Use `expo-in-app-purchases` or `react-native-iap`
-- Handle receipt validation
-- Manage subscription state
-- Handle renewals and cancellations
-
----
-
-## Step 15: Subscription Management
-
-### User Management
-Users can manage their subscription in:
-- Settings → Apple ID → Subscriptions
-- Or provide a link in your app: `https://apps.apple.com/account/subscriptions`
-
-### Cancellation
-- Users can cancel anytime
-- They keep access until the end of the billing period
-- No refunds for partial periods
-
-### Renewal
-- Auto-renews 24 hours before expiration
-- Users are charged automatically
-- Notify users before renewal (optional but recommended)
-
----
-
-## 📊 Subscription Analytics
-
-Track these metrics in App Store Connect:
-
-- **Subscribers:** Total active subscribers
-- **Conversion Rate:** Free to paid conversion
-- **Churn Rate:** Users who cancel
-- **Revenue:** Monthly recurring revenue (MRR)
-- **Trial Conversion:** Users who convert after trial
-
----
-
-## 💡 Best Practices
-
-### 1. Clear Value Proposition
-Show users exactly what they get:
-- List all 10 drills by name
-- Show leaderboard preview
-- Highlight veteran badge
-
-### 2. Paywall Placement
-Show paywall when users:
-- Try to access a locked drill (4th drill onwards)
-- Try to view global leaderboards
-- Try to access veteran features
-
-### 3. Restore Purchases
-Always provide a "Restore Purchases" button for users who:
-- Reinstall the app
-- Switch devices
-- Had a purchase issue
-
-### 4. Subscription Status
-Show subscription status in profile:
-- "Free Plan - 3 Drills"
-- "Premium - All Drills Unlocked"
-- "Expires on: [date]"
-
-### 5. Cancellation Flow
-Make it easy to cancel but:
-- Ask for feedback (why are you canceling?)
-- Offer alternatives (pause subscription, downgrade)
-- Remind them what they'll lose
-
----
-
-## 🚨 Common Issues
-
-### Issue 1: "Cannot connect to iTunes Store"
-- Check sandbox account is signed in
-- Verify product ID matches exactly
-- Ensure In-App Purchase is approved
-
-### Issue 2: "This In-App Purchase has already been bought"
-- Use "Restore Purchases" button
-- Clear sandbox account purchase history
-- Try a different sandbox account
-
-### Issue 3: Receipt validation fails
-- Verify you're using the correct validation endpoint
-- Check receipt is being sent correctly
-- Ensure server-side validation is working
-
-### Issue 4: Subscription doesn't unlock features
-- Verify receipt validation is working
-- Check subscription status is being stored correctly
-- Ensure app checks subscription on launch
-
----
-
-## 📱 Product ID Reference
-
-Use this exact product ID in your code:
-
-```typescript
-// services/subscriptionService.ts
-
-export const SUBSCRIPTION_PRODUCTS = {
-  PREMIUM_MONTHLY: 'com.teamsofast.sofastglobal.premium.monthly',
-};
-
-export const FREE_DRILL_IDS = [
-  'el-presidente',
-  'mozambique',
-  'dot-torture',
-];
-
-export const PREMIUM_DRILL_IDS = [
-  'bill-drill',
-  'fast',
-  '1-5-1',
-  'hackathorn-standards',
-  'failure-drill',
-  'walk-back',
-  '5x5',
-];
+TEST ACCOUNT (if required):
+Username: [test account]
+Password: [test password]
+Note: Premium features can be tested with sandbox account
 ```
 
 ---
 
-## 🔗 Useful Links
+## Common Issues & Solutions
 
-- **App Store Connect:** https://appstoreconnect.apple.com/
-- **In-App Purchase Documentation:** https://developer.apple.com/in-app-purchase/
-- **RevenueCat:** https://www.revenuecat.com/
-- **Expo In-App Purchases:** https://docs.expo.dev/versions/latest/sdk/in-app-purchases/
-- **Testing Guide:** https://developer.apple.com/documentation/storekit/in-app_purchase/testing_in-app_purchases
+### Issue: Subscription not unlocking features
+- **Solution**: Check RevenueCat webhook configuration
+- **Solution**: Verify entitlement mapping
 
----
+### Issue: Restore purchases not working
+- **Solution**: Implement proper restore flow in app
+- **Solution**: Check RevenueCat user ID consistency
 
-## ✅ Checklist
-
-Before submitting your app:
-
-- [ ] In-App Purchase created in App Store Connect
-- [ ] Product ID matches in code: `com.teamsofast.sofastglobal.premium.monthly`
-- [ ] Subscription tested with sandbox account
-- [ ] Paywall implemented in app
-- [ ] Restore Purchases button added
-- [ ] Subscription status displayed in profile
-- [ ] Receipt validation working
-- [ ] Free drills accessible without subscription
-- [ ] Premium drills locked for free users
-- [ ] Subscription unlocks all features
-- [ ] Cancellation flow tested
-- [ ] Privacy policy mentions subscriptions
-- [ ] App Store description mentions pricing
+### Issue: Subscription rejected
+- **Solution**: Ensure clear value proposition
+- **Solution**: Make free features substantial enough
+- **Solution**: Provide test account for review
 
 ---
 
-Good luck with your subscription setup! 💰
+## Post-Launch Monitoring
+
+Track these metrics:
+- **Conversion Rate**: Free → Premium
+- **Churn Rate**: Monthly cancellations
+- **LTV**: Lifetime value per user
+- **Trial Conversion**: Free trial → paid
+
+Use RevenueCat dashboard for analytics.
+
+---
+
+## Legal Requirements
+
+### Required Disclosures:
+- Price clearly displayed before purchase
+- Subscription terms visible
+- Auto-renewal clearly stated
+- Cancellation process explained
+- Privacy policy link provided
+
+### Terms of Service:
+Include in your app:
+- Subscription automatically renews
+- Charged to Apple ID at confirmation
+- Auto-renews unless cancelled 24 hours before period ends
+- Manage in iOS Settings → Apple ID → Subscriptions
+
+---
+
+## Next Steps
+
+1. ✅ Create subscription in App Store Connect
+2. ✅ Set up RevenueCat account
+3. ✅ Configure API keys in app
+4. ✅ Test with sandbox account
+5. ✅ Submit subscription for review
+6. ✅ Submit app for review
+7. ✅ Monitor conversion rates post-launch
+
+---
+
+## Support Resources
+
+- **RevenueCat Docs**: https://docs.revenuecat.com
+- **Apple Subscriptions**: https://developer.apple.com/app-store/subscriptions/
+- **App Store Connect**: https://appstoreconnect.apple.com
+
+---
+
+**Ready to monetize! 💰**
