@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert, Image, ActivityIndicator, Modal, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
@@ -24,6 +24,9 @@ export default function TargetPhotoScreen() {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [targetType, setTargetType] = useState<'USPSA' | 'IDPA'>('USPSA');
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [validationMessage, setValidationMessage] = useState('');
+  const [validationType, setValidationType] = useState<'unrecognizable' | 'not-approved' | null>(null);
   const cameraRef = useRef<any>(null);
 
   const handleTakePhoto = async () => {
@@ -67,6 +70,9 @@ export default function TargetPhotoScreen() {
 
   const handleRetake = () => {
     setCapturedImage(null);
+    setShowValidationModal(false);
+    setValidationMessage('');
+    setValidationType(null);
   };
 
   const handleAnalyze = async () => {
@@ -89,7 +95,31 @@ export default function TargetPhotoScreen() {
 
       console.log('Analysis complete:', analysis);
       
-      // Navigate to results with analysis data
+      // Check if the target is unrecognizable
+      if (!analysis.isRecognizable) {
+        setValidationType('unrecognizable');
+        setValidationMessage(
+          analysis.targetValidationMessage || 
+          'The target photo is unrecognizable. Please retake the photo with better lighting and ensure the target is clearly visible and in focus.'
+        );
+        setShowValidationModal(true);
+        setIsAnalyzing(false);
+        return;
+      }
+      
+      // Check if the target is not an approved USPSA/IDPA target
+      if (!analysis.isApprovedTarget) {
+        setValidationType('not-approved');
+        setValidationMessage(
+          analysis.targetValidationMessage || 
+          `This does not appear to be an approved ${targetType} target. For accurate scoring, we recommend using an official ${targetType} target. You can purchase approved targets from major shooting sports retailers or online.`
+        );
+        setShowValidationModal(true);
+        setIsAnalyzing(false);
+        return;
+      }
+      
+      // Target is valid, navigate to results with analysis data
       router.push({
         pathname: '/results/[id]',
         params: {
@@ -119,6 +149,34 @@ export default function TargetPhotoScreen() {
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const handleContinueWithoutValidTarget = () => {
+    setShowValidationModal(false);
+    
+    Alert.alert(
+      'Continue Without Valid Target?',
+      'Your score will be based on timing only, without accuracy verification. This may affect your ranking.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Continue',
+          style: 'default',
+          onPress: () => {
+            router.push({
+              pathname: '/results/[id]',
+              params: {
+                id: drill?.id || '',
+                time,
+                shots,
+                splits,
+                flinches,
+              }
+            });
+          }
+        }
+      ]
+    );
   };
 
   const handleSkip = () => {
@@ -346,6 +404,76 @@ export default function TargetPhotoScreen() {
           </>
         )}
       </View>
+
+      {/* Validation Modal */}
+      <Modal
+        visible={showValidationModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowValidationModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <IconSymbol
+                ios_icon_name={validationType === 'unrecognizable' ? 'exclamationmark.triangle.fill' : 'info.circle.fill'}
+                android_material_icon_name={validationType === 'unrecognizable' ? 'warning' : 'info'}
+                size={48}
+                color={validationType === 'unrecognizable' ? '#F59E0B' : '#3B82F6'}
+              />
+              <Text style={styles.modalTitle}>
+                {validationType === 'unrecognizable' ? 'Photo Unrecognizable' : 'Non-Approved Target'}
+              </Text>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              <Text style={styles.modalMessage}>{validationMessage}</Text>
+              
+              {validationType === 'not-approved' && (
+                <View style={styles.recommendationBox}>
+                  <Text style={styles.recommendationTitle}>Recommended Targets:</Text>
+                  <Text style={styles.recommendationText}>
+                    • USPSA Classic Target (Official)
+                  </Text>
+                  <Text style={styles.recommendationText}>
+                    • USPSA Metric Target
+                  </Text>
+                  <Text style={styles.recommendationText}>
+                    • IDPA Target (Official)
+                  </Text>
+                  <Text style={styles.recommendationText}>
+                    • Available at shooting sports retailers
+                  </Text>
+                </View>
+              )}
+            </ScrollView>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalButtonPrimary}
+                onPress={handleRetake}
+                activeOpacity={0.8}
+              >
+                <IconSymbol
+                  ios_icon_name="camera.fill"
+                  android_material_icon_name="camera"
+                  size={20}
+                  color={colors.background}
+                />
+                <Text style={styles.modalButtonPrimaryText}>Retake Photo</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.modalButtonSecondary}
+                onPress={handleContinueWithoutValidTarget}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.modalButtonSecondaryText}>Continue Anyway</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -600,6 +728,97 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   skipButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '80%',
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    alignItems: 'center',
+    padding: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  modalBody: {
+    padding: 20,
+    maxHeight: 300,
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    lineHeight: 24,
+    marginBottom: 16,
+  },
+  recommendationBox: {
+    backgroundColor: colors.background,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.secondary,
+  },
+  recommendationTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 12,
+  },
+  recommendationText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 22,
+    marginBottom: 4,
+  },
+  modalActions: {
+    padding: 20,
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.secondary,
+  },
+  modalButtonPrimary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    paddingVertical: 16,
+    borderRadius: 12,
+    gap: 8,
+  },
+  modalButtonPrimaryText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.background,
+  },
+  modalButtonSecondary: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.secondary,
+  },
+  modalButtonSecondaryText: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.textSecondary,

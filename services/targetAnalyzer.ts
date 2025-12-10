@@ -36,6 +36,10 @@ export interface TargetAnalysisResult {
   deltaHits: number;
   misses: number;
   targetType: 'USPSA' | 'IDPA';
+  isRecognizable: boolean;
+  isApprovedTarget: boolean;
+  recognitionConfidence: number;
+  targetValidationMessage?: string;
 }
 
 // USPSA Target Zones (Classic Target)
@@ -64,6 +68,65 @@ export class TargetAnalyzer {
       TargetAnalyzer.instance = new TargetAnalyzer();
     }
     return TargetAnalyzer.instance;
+  }
+
+  /**
+   * Validate if the image is recognizable and contains an approved target
+   * 
+   * PRODUCTION IMPLEMENTATION:
+   * This should use AI vision to:
+   * 1. Check image quality (blur, lighting, resolution)
+   * 2. Detect if a target is present in the image
+   * 3. Identify if it's a USPSA or IDPA approved target
+   * 4. Return validation results with confidence scores
+   */
+  private async validateTargetImage(
+    imageUri: string,
+    expectedTargetType: 'USPSA' | 'IDPA'
+  ): Promise<{
+    isRecognizable: boolean;
+    isApprovedTarget: boolean;
+    recognitionConfidence: number;
+    detectedTargetType?: 'USPSA' | 'IDPA' | 'UNKNOWN';
+    validationMessage?: string;
+  }> {
+    console.log('Validating target image...');
+    
+    // TODO: In production, use AI vision API to validate the image
+    // For now, simulate validation with random results for demonstration
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Simulate different validation scenarios
+    const scenario = Math.random();
+    
+    // 10% chance of unrecognizable image
+    if (scenario < 0.1) {
+      return {
+        isRecognizable: false,
+        isApprovedTarget: false,
+        recognitionConfidence: 0.3,
+        validationMessage: 'The image is too blurry or poorly lit to recognize the target. Please retake the photo with better lighting and ensure the target is in focus.',
+      };
+    }
+    
+    // 15% chance of non-approved target
+    if (scenario < 0.25) {
+      return {
+        isRecognizable: true,
+        isApprovedTarget: false,
+        recognitionConfidence: 0.85,
+        detectedTargetType: 'UNKNOWN',
+        validationMessage: `This does not appear to be an approved ${expectedTargetType} target. For accurate scoring, please use an official ${expectedTargetType} target. You can purchase approved targets from major shooting sports retailers.`,
+      };
+    }
+    
+    // 75% chance of valid target
+    return {
+      isRecognizable: true,
+      isApprovedTarget: true,
+      recognitionConfidence: 0.92,
+      detectedTargetType: expectedTargetType,
+    };
   }
 
   /**
@@ -112,15 +175,46 @@ export class TargetAnalyzer {
       console.log(`Analyzing ${targetType} target with ${expectedHits} expected hits`);
       console.log('Image URI:', imageUri);
 
-      // TODO: In production, send image to AI backend
+      // First, validate the target image
+      const validation = await this.validateTargetImage(imageUri, targetType);
+      
+      // If image is not recognizable or not an approved target, return validation result
+      if (!validation.isRecognizable || !validation.isApprovedTarget) {
+        return {
+          totalHits: 0,
+          hits: [],
+          totalPoints: 0,
+          maxPoints: 0,
+          accuracy: 0,
+          alphaHits: 0,
+          charlieHits: 0,
+          deltaHits: 0,
+          misses: 0,
+          targetType,
+          isRecognizable: validation.isRecognizable,
+          isApprovedTarget: validation.isApprovedTarget,
+          recognitionConfidence: validation.recognitionConfidence,
+          targetValidationMessage: validation.validationMessage,
+        };
+      }
+
+      // TODO: In production, send image to AI backend for hit analysis
       // For now, simulate AI processing with realistic delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Generate mock analysis results
       const mockResult = this.generateMockAnalysis(targetType, expectedHits);
       
-      console.log('Target analysis complete:', mockResult);
-      return mockResult;
+      // Add validation data to result
+      const result: TargetAnalysisResult = {
+        ...mockResult,
+        isRecognizable: validation.isRecognizable,
+        isApprovedTarget: validation.isApprovedTarget,
+        recognitionConfidence: validation.recognitionConfidence,
+      };
+      
+      console.log('Target analysis complete:', result);
+      return result;
     } catch (error) {
       console.error('Error analyzing target:', error);
       throw error;
@@ -134,7 +228,7 @@ export class TargetAnalyzer {
   private generateMockAnalysis(
     targetType: 'USPSA' | 'IDPA',
     expectedHits: number
-  ): TargetAnalysisResult {
+  ): Omit<TargetAnalysisResult, 'isRecognizable' | 'isApprovedTarget' | 'recognitionConfidence'> {
     const hits: HitAnalysis[] = [];
     let alphaHits = 0;
     let charlieHits = 0;
