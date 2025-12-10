@@ -3,11 +3,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
-import { useAudioRecorder, RecordingPresets, setAudioModeAsync } from 'expo-audio';
 import { Gyroscope } from 'expo-sensors';
 import { colors } from '@/styles/commonStyles';
 import { getDrillById } from '@/data/drills';
 import { IconSymbol } from '@/components/IconSymbol';
+import { ShotDetector, FlinchDetector } from '@/services/shotDetection';
+import { AudioAnalyzer } from '@/services/audioAnalyzer';
+import { ParTimer } from '@/services/parTimer';
 
 export default function CameraScreen() {
   const router = useRouter();
@@ -22,67 +24,90 @@ export default function CameraScreen() {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [shotCount, setShotCount] = useState(0);
   const [splits, setSplits] = useState<number[]>([]);
+  const [flinchCount, setFlinchCount] = useState(0);
+  const [parReached, setParReached] = useState(false);
   
   const cameraRef = useRef<any>(null);
-  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
   const lastShotTimeRef = useRef<number>(0);
   const gyroSubscriptionRef = useRef<any>(null);
+  
+  const shotDetectorRef = useRef(new ShotDetector());
+  const flinchDetectorRef = useRef(new FlinchDetector());
+  const audioAnalyzerRef = useRef(new AudioAnalyzer());
+  const parTimerRef = useRef(new ParTimer());
 
   useEffect(() => {
-    setupAudio();
+    parTimerRef.current.initialize();
+    
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (gyroSubscriptionRef.current) {
         gyroSubscriptionRef.current.remove();
       }
+      audioAnalyzerRef.current.stopAnalyzing();
+      parTimerRef.current.cleanup();
     };
   }, []);
 
-  const setupAudio = async () => {
-    try {
-      await setAudioModeAsync({
-        playsInSilentMode: true,
-        allowsRecording: true,
-      });
-    } catch (error) {
-      console.error('Error setting up audio:', error);
-    }
-  };
-
-  const setupGyroscope = () => {
-    console.log('Setting up gyroscope for recoil detection');
+  const setupSensors = async () => {
+    console.log('Setting up sensors for shot detection');
+    
+    // Setup gyroscope
     Gyroscope.setUpdateInterval(16); // ~60fps
     
     gyroSubscriptionRef.current = Gyroscope.addListener(gyroscopeData => {
-      // Detect significant movement (recoil/flinch)
-      const magnitude = Math.sqrt(
-        gyroscopeData.x ** 2 + 
-        gyroscopeData.y ** 2 + 
-        gyroscopeData.z ** 2
+      // Add to flinch detector
+      flinchDetectorRef.current.addGyroSample(
+        gyroscopeData.x,
+        gyroscopeData.y,
+        gyroscopeData.z
       );
-      
-      // Threshold for shot detection (adjust based on testing)
-      if (magnitude > 2.5 && isRecording) {
-        handleShotDetected();
+
+      // Check for shot via gyro
+      const gyroResult = shotDetectorRef.current.processGyroData(
+        gyroscopeData.x,
+        gyroscopeData.y,
+        gyroscopeData.z
+      );
+
+      if (gyroResult) {
+        handleShotDetected(gyroResult.timestamp);
       }
     });
+
+    // Setup audio analyzer
+    await audioAnalyzerRef.current.startAnalyzing((level) => {
+      const audioResult = shotDetectorRef.current.processAudioLevel(level);
+      if (audioResult) {
+        handleShotDetected(audioResult.timestamp);
+      }
+    });
+
+    shotDetectorRef.current.startMonitoring();
   };
 
-  const handleShotDetected = () => {
-    const now = Date.now();
+  const handleShotDetected = (timestamp: number) => {
+    const now = timestamp;
     const timeSinceStart = (now - startTimeRef.current) / 1000;
     
+    // Calculate split time
     if (lastShotTimeRef.current > 0) {
       const split = (now - lastShotTimeRef.current) / 1000;
       setSplits(prev => [...prev, split]);
     }
     
+    // Check for flinch
+    const hasFlinch = flinchDetectorRef.current.detectFlinch(timestamp);
+    if (hasFlinch) {
+      setFlinchCount(prev => prev + 1);
+    }
+    
     lastShotTimeRef.current = now;
     setShotCount(prev => prev + 1);
     
-    console.log(`Shot detected! Count: ${shotCount + 1}, Time: ${timeSinceStart.toFixed(2)}s`);
+    console.log(`Shot ${shotCount + 1} detected at ${timeSinceStart.toFixed(2)}s${hasFlinch ? ' (FLINCH)' : ''}`);
   };
 
   const startDrill = async () => {
@@ -122,24 +147,33 @@ export default function CameraScreen() {
     try {
       console.log('Starting recording...');
       setIsRecording(true);
+      setParReached(false);
       startTimeRef.current = Date.now();
       lastShotTimeRef.current = 0;
       setShotCount(0);
       setSplits([]);
+      setFlinchCount(0);
+      
+      // Play start beep
+      await parTimerRef.current.playStartBeep();
       
       // Start camera recording
       if (cameraRef.current) {
         cameraRef.current.recordAsync();
       }
       
-      // Start audio recording
-      await audioRecorder.prepareToRecordAsync();
-      audioRecorder.record();
+      // Start sensors
+      await setupSensors();
       
-      // Start gyroscope
-      setupGyroscope();
+      // Start par timer if drill has par time
+      if (drill?.parTime) {
+        parTimerRef.current.startParTimer(drill.parTime, () => {
+          setParReached(true);
+          console.log('Par time reached!');
+        });
+      }
       
-      // Start timer
+      // Start elapsed time timer
       timerRef.current = setInterval(() => {
         const elapsed = (Date.now() - startTimeRef.current) / 1000;
         setElapsedTime(elapsed);
@@ -162,19 +196,22 @@ export default function CameraScreen() {
         timerRef.current = null;
       }
       
-      // Stop gyroscope
+      // Stop par timer
+      parTimerRef.current.stopParTimer();
+      
+      // Stop sensors
       if (gyroSubscriptionRef.current) {
         gyroSubscriptionRef.current.remove();
         gyroSubscriptionRef.current = null;
       }
       
+      shotDetectorRef.current.stopMonitoring();
+      await audioAnalyzerRef.current.stopAnalyzing();
+      
       // Stop camera recording
       if (cameraRef.current) {
         await cameraRef.current.stopRecording();
       }
-      
-      // Stop audio recording
-      await audioRecorder.stop();
       
       // Navigate to results
       router.push({
@@ -184,6 +221,7 @@ export default function CameraScreen() {
           time: elapsedTime.toFixed(2),
           shots: shotCount.toString(),
           splits: JSON.stringify(splits),
+          flinches: flinchCount.toString(),
         }
       });
       
@@ -213,7 +251,7 @@ export default function CameraScreen() {
           />
           <Text style={styles.permissionTitle}>Permissions Required</Text>
           <Text style={styles.permissionText}>
-            SOFAST Global needs camera and microphone access to record and analyze your drills.
+            SOFAST Global needs camera and microphone access to record and analyze your drills with AI-powered shot detection.
           </Text>
           <TouchableOpacity
             style={styles.permissionButton}
@@ -266,6 +304,7 @@ export default function CameraScreen() {
         {countdown !== null && (
           <View style={styles.countdownOverlay}>
             <Text style={styles.countdownText}>{countdown}</Text>
+            <Text style={styles.countdownSubtext}>GET READY</Text>
           </View>
         )}
 
@@ -274,7 +313,12 @@ export default function CameraScreen() {
           <View style={styles.statsOverlay}>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>TIME</Text>
-              <Text style={styles.statValue}>{elapsedTime.toFixed(2)}s</Text>
+              <Text style={[
+                styles.statValue,
+                parReached && styles.overPar
+              ]}>
+                {elapsedTime.toFixed(2)}s
+              </Text>
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>SHOTS</Text>
@@ -285,12 +329,25 @@ export default function CameraScreen() {
                 <Text style={styles.statLabel}>PAR</Text>
                 <Text style={[
                   styles.statValue,
-                  elapsedTime > drill.parTime && styles.overPar
+                  parReached && styles.overPar
                 ]}>
                   {drill.parTime}s
                 </Text>
               </View>
             )}
+          </View>
+        )}
+
+        {/* Flinch Warning */}
+        {isRecording && flinchCount > 0 && (
+          <View style={styles.flinchWarning}>
+            <IconSymbol
+              ios_icon_name="exclamationmark.triangle.fill"
+              android_material_icon_name="warning"
+              size={16}
+              color={colors.accent}
+            />
+            <Text style={styles.flinchText}>{flinchCount} Flinch{flinchCount > 1 ? 'es' : ''} Detected</Text>
           </View>
         )}
 
@@ -331,8 +388,14 @@ export default function CameraScreen() {
         {/* Instructions */}
         {!isRecording && countdown === null && (
           <View style={styles.instructionsOverlay}>
+            <IconSymbol
+              ios_icon_name="info.circle.fill"
+              android_material_icon_name="info"
+              size={24}
+              color={colors.primary}
+            />
             <Text style={styles.instructionText}>
-              Prop your phone on a stable surface with a clear view of the target area
+              Prop your phone on a stable surface with a clear view of the target area. AI will detect shots via audio and recoil.
             </Text>
           </View>
         )}
@@ -384,6 +447,13 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: colors.primary,
   },
+  countdownSubtext: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.text,
+    marginTop: 16,
+    letterSpacing: 4,
+  },
   statsOverlay: {
     position: 'absolute',
     top: Platform.OS === 'android' ? 120 : 140,
@@ -417,9 +487,26 @@ const styles = StyleSheet.create({
   overPar: {
     color: colors.accent,
   },
-  recordingIndicator: {
+  flinchWarning: {
     position: 'absolute',
     top: Platform.OS === 'android' ? 220 : 240,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(250, 204, 21, 0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
+  },
+  flinchText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.background,
+  },
+  recordingIndicator: {
+    position: 'absolute',
+    top: Platform.OS === 'android' ? 260 : 280,
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
@@ -471,16 +558,19 @@ const styles = StyleSheet.create({
     bottom: 140,
     left: 16,
     right: 16,
-    backgroundColor: 'rgba(30, 41, 59, 0.9)',
+    backgroundColor: 'rgba(30, 41, 59, 0.95)',
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
     borderColor: colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   instructionText: {
+    flex: 1,
     fontSize: 14,
     color: colors.text,
-    textAlign: 'center',
     lineHeight: 20,
   },
   text: {

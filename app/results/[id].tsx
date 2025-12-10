@@ -1,29 +1,100 @@
 
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors } from '@/styles/commonStyles';
 import { getDrillById } from '@/data/drills';
 import { IconSymbol } from '@/components/IconSymbol';
+import { LeaderboardService, Division } from '@/services/leaderboardService';
+import { DrillResult } from '@/types/drills';
 
 export default function ResultsScreen() {
   const router = useRouter();
-  const { id, time, shots, splits } = useLocalSearchParams<{
+  const { id, time, shots, splits, flinches } = useLocalSearchParams<{
     id: string;
     time: string;
     shots: string;
     splits: string;
+    flinches?: string;
   }>();
   
   const drill = getDrillById(id);
   const totalTime = parseFloat(time || '0');
   const shotCount = parseInt(shots || '0', 10);
   const splitTimes = splits ? JSON.parse(splits) : [];
+  const flinchCount = parseInt(flinches || '0', 10);
+  
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
   
   const isPar = drill?.parTime ? totalTime <= drill.parTime : false;
   const averageSplit = splitTimes.length > 0 
     ? splitTimes.reduce((a: number, b: number) => a + b, 0) / splitTimes.length 
     : 0;
+  
+  const fastestSplit = splitTimes.length > 0 ? Math.min(...splitTimes) : 0;
+  const slowestSplit = splitTimes.length > 0 ? Math.max(...splitTimes) : 0;
+
+  // Calculate score (simple scoring: 100 - time penalty - miss penalty - flinch penalty)
+  const calculateScore = () => {
+    let score = 100;
+    
+    // Time penalty
+    if (drill?.parTime) {
+      const timeDiff = totalTime - drill.parTime;
+      if (timeDiff > 0) {
+        score -= timeDiff * 2; // -2 points per second over par
+      }
+    }
+    
+    // Miss penalty
+    const expectedShots = drill?.rounds || shotCount;
+    if (shotCount < expectedShots) {
+      score -= (expectedShots - shotCount) * 5; // -5 points per missed shot
+    }
+    
+    // Flinch penalty
+    score -= flinchCount * 3; // -3 points per flinch
+    
+    return Math.max(0, Math.round(score));
+  };
+
+  const score = calculateScore();
+
+  const handleUploadScore = async () => {
+    try {
+      setIsUploading(true);
+      
+      const result: DrillResult = {
+        drillId: drill?.id || '',
+        drillName: drill?.name || '',
+        timestamp: Date.now(),
+        totalTime,
+        splits: splitTimes,
+        hits: shotCount,
+        misses: (drill?.rounds || 0) - shotCount,
+        score,
+        division: 'Open', // TODO: Let user select division
+        flinchDetected: flinchCount > 0,
+      };
+
+      const leaderboardService = LeaderboardService.getInstance();
+      const success = await leaderboardService.submitScore(result);
+      
+      setUploadSuccess(success);
+      setIsUploading(false);
+      
+      if (success) {
+        Alert.alert('Success', 'Your score has been uploaded to the global leaderboard!');
+      } else {
+        Alert.alert('Queued', 'Your score will be uploaded when you have an internet connection.');
+      }
+    } catch (error) {
+      console.error('Error uploading score:', error);
+      setIsUploading(false);
+      Alert.alert('Error', 'Failed to upload score. It will be queued for later.');
+    }
+  };
 
   const handleDone = () => {
     router.push('/(tabs)/(home)/');
@@ -31,6 +102,13 @@ export default function ResultsScreen() {
 
   const handleRetry = () => {
     router.back();
+  };
+
+  const handleViewLeaderboard = () => {
+    router.push({
+      pathname: '/leaderboard/[id]',
+      params: { id: drill?.id || '' }
+    });
   };
 
   return (
@@ -47,6 +125,13 @@ export default function ResultsScreen() {
       >
         {/* Drill Name */}
         <Text style={styles.drillName}>{drill?.name}</Text>
+
+        {/* Score Badge */}
+        <View style={styles.scoreBadge}>
+          <Text style={styles.scoreLabel}>SCORE</Text>
+          <Text style={styles.scoreValue}>{score}</Text>
+          <Text style={styles.scoreMax}>/ 100</Text>
+        </View>
 
         {/* Main Stats */}
         <View style={styles.mainStatsContainer}>
@@ -85,47 +170,118 @@ export default function ResultsScreen() {
               {splitTimes.map((split: number, index: number) => (
                 <View key={index} style={styles.splitItem}>
                   <Text style={styles.splitNumber}>#{index + 1}</Text>
+                  <View style={styles.splitBar}>
+                    <View 
+                      style={[
+                        styles.splitBarFill,
+                        { width: `${(split / slowestSplit) * 100}%` }
+                      ]} 
+                    />
+                  </View>
                   <Text style={styles.splitTime}>{split.toFixed(3)}s</Text>
                 </View>
               ))}
             </View>
-            <View style={styles.averageCard}>
-              <Text style={styles.averageLabel}>Average Split</Text>
-              <Text style={styles.averageValue}>{averageSplit.toFixed(3)}s</Text>
+            <View style={styles.splitStatsRow}>
+              <View style={styles.splitStatCard}>
+                <Text style={styles.splitStatLabel}>Average</Text>
+                <Text style={styles.splitStatValue}>{averageSplit.toFixed(3)}s</Text>
+              </View>
+              <View style={styles.splitStatCard}>
+                <Text style={styles.splitStatLabel}>Fastest</Text>
+                <Text style={styles.splitStatValue}>{fastestSplit.toFixed(3)}s</Text>
+              </View>
+              <View style={styles.splitStatCard}>
+                <Text style={styles.splitStatLabel}>Slowest</Text>
+                <Text style={styles.splitStatValue}>{slowestSplit.toFixed(3)}s</Text>
+              </View>
             </View>
           </View>
         )}
 
-        {/* AI Analysis Placeholder */}
+        {/* AI Analysis */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>AI ANALYSIS</Text>
           <View style={styles.analysisCard}>
-            <IconSymbol
-              ios_icon_name="brain"
-              android_material_icon_name="psychology"
-              size={32}
-              color={colors.primary}
-            />
-            <Text style={styles.analysisText}>
-              AI-powered shot detection and form analysis coming soon. This will include muzzle flash detection, recoil pattern analysis, and flinch detection using Vision/Core ML.
+            <View style={styles.analysisHeader}>
+              <IconSymbol
+                ios_icon_name="brain"
+                android_material_icon_name="psychology"
+                size={32}
+                color={colors.primary}
+              />
+              <Text style={styles.analysisTitle}>Shot Detection</Text>
+            </View>
+            <View style={styles.analysisStats}>
+              <View style={styles.analysisStatItem}>
+                <IconSymbol
+                  ios_icon_name="waveform"
+                  android_material_icon_name="graphic_eq"
+                  size={20}
+                  color={colors.textSecondary}
+                />
+                <Text style={styles.analysisStatText}>Audio + Gyro Detection</Text>
+              </View>
+              {flinchCount > 0 && (
+                <View style={styles.analysisStatItem}>
+                  <IconSymbol
+                    ios_icon_name="exclamationmark.triangle.fill"
+                    android_material_icon_name="warning"
+                    size={20}
+                    color={colors.accent}
+                  />
+                  <Text style={styles.analysisStatText}>{flinchCount} Flinch{flinchCount > 1 ? 'es' : ''} Detected</Text>
+                </View>
+              )}
+              <View style={styles.analysisStatItem}>
+                <IconSymbol
+                  ios_icon_name="checkmark.circle.fill"
+                  android_material_icon_name="check_circle"
+                  size={20}
+                  color={colors.primary}
+                />
+                <Text style={styles.analysisStatText}>{shotCount} Shots Confirmed</Text>
+              </View>
+            </View>
+            <Text style={styles.analysisNote}>
+              Advanced muzzle flash detection and form analysis coming in future updates.
             </Text>
           </View>
         </View>
 
-        {/* Leaderboard Placeholder */}
+        {/* Upload to Leaderboard */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>GLOBAL LEADERBOARD</Text>
-          <View style={styles.leaderboardCard}>
+          <TouchableOpacity
+            style={[styles.uploadButton, uploadSuccess && styles.uploadButtonSuccess]}
+            onPress={handleUploadScore}
+            disabled={isUploading || uploadSuccess}
+            activeOpacity={0.8}
+          >
+            <IconSymbol
+              ios_icon_name={uploadSuccess ? "checkmark.circle.fill" : "arrow.up.circle.fill"}
+              android_material_icon_name={uploadSuccess ? "check_circle" : "cloud_upload"}
+              size={24}
+              color={uploadSuccess ? colors.primary : colors.text}
+            />
+            <Text style={[styles.uploadButtonText, uploadSuccess && styles.uploadButtonTextSuccess]}>
+              {isUploading ? 'Uploading...' : uploadSuccess ? 'Score Uploaded!' : 'Upload to Leaderboard'}
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.viewLeaderboardButton}
+            onPress={handleViewLeaderboard}
+            activeOpacity={0.8}
+          >
             <IconSymbol
               ios_icon_name="trophy.fill"
               android_material_icon_name="emoji_events"
-              size={32}
+              size={20}
               color={colors.accent}
             />
-            <Text style={styles.leaderboardText}>
-              Firebase global rankings coming soon. Compete in Open, Vet, and LE divisions.
-            </Text>
-          </View>
+            <Text style={styles.viewLeaderboardText}>View Leaderboard</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Bottom padding */}
@@ -145,7 +301,7 @@ export default function ResultsScreen() {
             size={24}
             color={colors.text}
           />
-          <Text style={styles.retryButtonText}>Retry Drill</Text>
+          <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -188,7 +344,35 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: colors.text,
     textAlign: 'center',
+    marginBottom: 16,
+  },
+  scoreBadge: {
+    alignSelf: 'center',
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.primary,
     marginBottom: 24,
+    minWidth: 160,
+  },
+  scoreLabel: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: colors.textSecondary,
+    letterSpacing: 2,
+  },
+  scoreValue: {
+    fontSize: 56,
+    fontWeight: '900',
+    color: colors.primary,
+    marginVertical: 4,
+  },
+  scoreMax: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.textSecondary,
   },
   mainStatsContainer: {
     flexDirection: 'row',
@@ -201,8 +385,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: colors.primary,
+    borderWidth: 1,
+    borderColor: colors.secondary,
   },
   mainStatLabel: {
     fontSize: 12,
@@ -212,7 +396,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   mainStatValue: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: '900',
     color: colors.text,
   },
@@ -251,71 +435,135 @@ const styles = StyleSheet.create({
   },
   splitItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.secondary,
+    gap: 12,
   },
   splitNumber: {
     fontSize: 14,
     fontWeight: '600',
     color: colors.textSecondary,
+    width: 32,
+  },
+  splitBar: {
+    flex: 1,
+    height: 8,
+    backgroundColor: colors.secondary,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  splitBarFill: {
+    height: '100%',
+    backgroundColor: colors.primary,
   },
   splitTime: {
     fontSize: 16,
     fontWeight: '700',
     color: colors.text,
+    width: 80,
+    textAlign: 'right',
   },
-  averageCard: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
+  splitStatsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 8,
+  },
+  splitStatCard: {
+    flex: 1,
+    backgroundColor: colors.card,
+    borderRadius: 8,
+    padding: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: colors.secondary,
   },
-  averageLabel: {
-    fontSize: 14,
+  splitStatLabel: {
+    fontSize: 10,
     fontWeight: '700',
     color: colors.textSecondary,
+    marginBottom: 4,
   },
-  averageValue: {
-    fontSize: 20,
-    fontWeight: '900',
+  splitStatValue: {
+    fontSize: 16,
+    fontWeight: '700',
     color: colors.primary,
   },
   analysisCard: {
     backgroundColor: colors.card,
     borderRadius: 12,
     padding: 20,
-    alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.secondary,
   },
-  analysisText: {
+  analysisHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  analysisTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  analysisStats: {
+    gap: 12,
+    marginBottom: 16,
+  },
+  analysisStatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  analysisStatText: {
     fontSize: 14,
     color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 20,
-    marginTop: 12,
+    fontWeight: '600',
   },
-  leaderboardCard: {
+  analysisNote: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    fontStyle: 'italic',
+    lineHeight: 18,
+  },
+  uploadButton: {
     backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 20,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 12,
+    gap: 12,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    marginBottom: 12,
+  },
+  uploadButtonSuccess: {
+    borderColor: colors.primary,
+    backgroundColor: colors.card,
+  },
+  uploadButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  uploadButtonTextSuccess: {
+    color: colors.primary,
+  },
+  viewLeaderboardButton: {
+    backgroundColor: colors.card,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
     borderWidth: 1,
     borderColor: colors.secondary,
   },
-  leaderboardText: {
+  viewLeaderboardText: {
     fontSize: 14,
+    fontWeight: '600',
     color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 20,
-    marginTop: 12,
   },
   buttonContainer: {
     flexDirection: 'row',

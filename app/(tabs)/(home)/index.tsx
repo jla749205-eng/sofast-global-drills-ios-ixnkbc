@@ -1,22 +1,66 @@
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '@/styles/commonStyles';
 import { DRILLS } from '@/data/drills';
 import { IconSymbol } from '@/components/IconSymbol';
+import { SubscriptionService } from '@/services/subscriptionService';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [isPremium, setIsPremium] = useState(false); // TODO: Connect to RevenueCat
+  const [isPremium, setIsPremium] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    initializeSubscription();
+  }, []);
+
+  const initializeSubscription = async () => {
+    try {
+      const subscriptionService = SubscriptionService.getInstance();
+      await subscriptionService.initialize();
+      const status = await subscriptionService.checkSubscriptionStatus();
+      setIsPremium(status.isPremium);
+    } catch (error) {
+      console.error('Error initializing subscription:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpgrade = async () => {
+    Alert.alert(
+      'Upgrade to Premium',
+      'Unlock all 10 drills, advanced AI analysis, and veteran badge for $4.99/month',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Subscribe',
+          onPress: async () => {
+            try {
+              const subscriptionService = SubscriptionService.getInstance();
+              const success = await subscriptionService.purchaseSubscription();
+              if (success) {
+                setIsPremium(true);
+                Alert.alert('Success', 'Welcome to SOFAST Premium!');
+              }
+            } catch (error) {
+              console.error('Error purchasing subscription:', error);
+              Alert.alert('Error', 'Failed to process subscription');
+            }
+          }
+        }
+      ]
+    );
+  };
 
   const freeDrills = DRILLS.filter(d => !d.isPremium);
   const premiumDrills = DRILLS.filter(d => d.isPremium);
 
   const handleDrillPress = (drillId: string, isPremiumDrill: boolean) => {
     if (isPremiumDrill && !isPremium) {
-      console.log('Premium subscription required');
-      // TODO: Show subscription modal
+      handleUpgrade();
       return;
     }
     router.push(`/drill/${drillId}`);
@@ -109,6 +153,48 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <Text style={styles.logo}>SOFAST</Text>
           <Text style={styles.subtitle}>Global Marksmanship Drills</Text>
+          {isPremium && (
+            <View style={styles.premiumBadgeLarge}>
+              <IconSymbol
+                ios_icon_name="star.fill"
+                android_material_icon_name="star"
+                size={16}
+                color={colors.accent}
+              />
+              <Text style={styles.premiumBadgeText}>PREMIUM MEMBER</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Features Banner */}
+        <View style={styles.featuresBanner}>
+          <View style={styles.featureItem}>
+            <IconSymbol
+              ios_icon_name="waveform"
+              android_material_icon_name="graphic_eq"
+              size={20}
+              color={colors.primary}
+            />
+            <Text style={styles.featureText}>AI Shot Detection</Text>
+          </View>
+          <View style={styles.featureItem}>
+            <IconSymbol
+              ios_icon_name="timer"
+              android_material_icon_name="timer"
+              size={20}
+              color={colors.primary}
+            />
+            <Text style={styles.featureText}>Auto Split Timing</Text>
+          </View>
+          <View style={styles.featureItem}>
+            <IconSymbol
+              ios_icon_name="trophy.fill"
+              android_material_icon_name="emoji_events"
+              size={20}
+              color={colors.primary}
+            />
+            <Text style={styles.featureText}>Global Leaderboards</Text>
+          </View>
         </View>
 
         {/* Free Drills Section */}
@@ -124,7 +210,7 @@ export default function HomeScreen() {
             {!isPremium && (
               <TouchableOpacity
                 style={styles.upgradeButton}
-                onPress={() => console.log('Show subscription')}
+                onPress={handleUpgrade}
               >
                 <Text style={styles.upgradeButtonText}>Upgrade $4.99/mo</Text>
               </TouchableOpacity>
@@ -154,7 +240,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 24,
     paddingVertical: 20,
   },
   logo: {
@@ -172,6 +258,44 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     letterSpacing: 3,
     marginTop: 4,
+  },
+  premiumBadgeLarge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.card,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: colors.accent,
+  },
+  premiumBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.accent,
+    letterSpacing: 1,
+  },
+  featuresBanner: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: colors.secondary,
+  },
+  featureItem: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  featureText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.textSecondary,
+    textAlign: 'center',
   },
   section: {
     marginBottom: 32,
