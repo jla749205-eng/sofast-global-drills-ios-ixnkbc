@@ -268,7 +268,7 @@ export default function TargetPhotoScreen() {
             facing="back"
           >
             <View style={styles.targetGuide}>
-              <View style={styles.targetGuideCorner} style={[styles.targetGuideCorner, styles.topLeft]} />
+              <View style={[styles.targetGuideCorner, styles.topLeft]} />
               <View style={[styles.targetGuideCorner, styles.topRight]} />
               <View style={[styles.targetGuideCorner, styles.bottomLeft]} />
               <View style={[styles.targetGuideCorner, styles.bottomRight]} />

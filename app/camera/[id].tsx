@@ -39,16 +39,17 @@ export default function CameraScreen() {
   const parTimerRef = useRef(new ParTimer());
 
   useEffect(() => {
-    parTimerRef.current.initialize();
+    // Copy ref values to variables for cleanup
+    const audioAnalyzer = audioAnalyzerRef.current;
+    const parTimer = parTimerRef.current;
+    
+    parTimer.initialize();
     
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (gyroSubscriptionRef.current) {
         gyroSubscriptionRef.current.remove();
       }
-      // Copy ref values to variables for cleanup
-      const audioAnalyzer = audioAnalyzerRef.current;
-      const parTimer = parTimerRef.current;
       audioAnalyzer.stopAnalyzing();
       parTimer.cleanup();
     };

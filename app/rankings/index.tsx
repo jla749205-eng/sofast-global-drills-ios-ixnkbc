@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '@/styles/commonStyles';
@@ -25,11 +25,7 @@ export default function RankingsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [userRanking, setUserRanking] = useState<RankingEntry | null>(null);
 
-  useEffect(() => {
-    loadRankings();
-  }, [selectedDivision]);
-
-  const loadRankings = async () => {
+  const loadRankings = useCallback(async () => {
     try {
       setIsLoading(true);
       
@@ -47,7 +43,11 @@ export default function RankingsScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedDivision]);
+
+  useEffect(() => {
+    loadRankings();
+  }, [loadRankings]);
 
   const getClassificationColor = (classification: string): string => {
     const analyzer = TargetAnalyzer.getInstance();
