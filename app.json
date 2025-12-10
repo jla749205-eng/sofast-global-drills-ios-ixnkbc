@@ -1,31 +1,37 @@
+
 {
   "expo": {
     "name": "SOFAST Global",
     "slug": "sofast-global",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/natively-dark.png",
+    "icon": "./assets/images/7cadd481-5bea-470d-802a-1f44d5a96178.jpeg",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/natively-dark.png",
+      "image": "./assets/images/7cadd481-5bea-470d-802a-1f44d5a96178.jpeg",
       "resizeMode": "contain",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#2D4A2B"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.Natively",
+      "bundleIdentifier": "com.teamsofast.sofastglobal",
+      "buildNumber": "1",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "SOFAST Global needs camera access to record your shooting drills and analyze your performance.",
+        "NSMicrophoneUsageDescription": "SOFAST Global needs microphone access to detect shots and provide accurate timing.",
+        "NSMotionUsageDescription": "SOFAST Global uses motion sensors to detect recoil and analyze your shooting form."
       }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/natively-dark.png",
-        "backgroundColor": "#000000"
+        "foregroundImage": "./assets/images/7cadd481-5bea-470d-802a-1f44d5a96178.jpeg",
+        "backgroundColor": "#2D4A2B"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.Natively"
+      "package": "com.teamsofast.sofastglobal",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/images/final_quest_240x240.png",
@@ -38,24 +44,33 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow SOFAST Global to access your camera for drill recording.",
-          "microphonePermission": "Allow SOFAST Global to access your microphone for shot detection.",
+          "cameraPermission": "SOFAST Global needs camera access to record your shooting drills and analyze your performance.",
+          "microphonePermission": "SOFAST Global needs microphone access to detect shots and provide accurate timing.",
           "recordAudioAndroid": true
         }
       ],
       [
         "expo-audio",
         {
-          "microphonePermission": "Allow SOFAST Global to access your microphone for shot detection."
+          "microphonePermission": "SOFAST Global needs microphone access to detect shots and provide accurate timing."
+        }
+      ],
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "SOFAST Global uses motion sensors to detect recoil and analyze your shooting form."
         }
       ]
     ],
-    "scheme": "natively",
+    "scheme": "sofastglobal",
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
-      "router": {}
+      "router": {},
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID"
+      }
     }
   }
 }
