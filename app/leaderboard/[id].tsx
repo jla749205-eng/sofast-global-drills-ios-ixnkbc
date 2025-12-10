@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors } from '@/styles/commonStyles';
@@ -18,12 +18,7 @@ export default function LeaderboardScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [pendingCount, setPendingCount] = useState(0);
 
-  useEffect(() => {
-    loadLeaderboard();
-    checkPendingUploads();
-  }, [selectedDivision]);
-
-  const loadLeaderboard = async () => {
+  const loadLeaderboard = useCallback(async () => {
     try {
       setIsLoading(true);
       const leaderboardService = LeaderboardService.getInstance();
@@ -34,12 +29,17 @@ export default function LeaderboardScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id, selectedDivision]);
 
-  const checkPendingUploads = () => {
+  const checkPendingUploads = useCallback(() => {
     const leaderboardService = LeaderboardService.getInstance();
     setPendingCount(leaderboardService.getPendingUploadCount());
-  };
+  }, []);
+
+  useEffect(() => {
+    loadLeaderboard();
+    checkPendingUploads();
+  }, [loadLeaderboard, checkPendingUploads]);
 
   const handleSync = async () => {
     try {

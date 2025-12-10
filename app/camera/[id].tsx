@@ -46,8 +46,11 @@ export default function CameraScreen() {
       if (gyroSubscriptionRef.current) {
         gyroSubscriptionRef.current.remove();
       }
-      audioAnalyzerRef.current.stopAnalyzing();
-      parTimerRef.current.cleanup();
+      // Copy ref values to variables for cleanup
+      const audioAnalyzer = audioAnalyzerRef.current;
+      const parTimer = parTimerRef.current;
+      audioAnalyzer.stopAnalyzing();
+      parTimer.cleanup();
     };
   }, []);
 

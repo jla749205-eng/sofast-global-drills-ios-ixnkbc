@@ -118,7 +118,7 @@ export class ShotDetector {
 
 // Flinch detection based on gyroscope patterns
 export class FlinchDetector {
-  private gyroHistory: Array<{ x: number; y: number; z: number; timestamp: number }> = [];
+  private gyroHistory: { x: number; y: number; z: number; timestamp: number }[] = [];
   private maxHistorySize = 30; // Keep last 30 samples (~500ms at 60fps)
 
   addGyroSample(x: number, y: number, z: number) {
