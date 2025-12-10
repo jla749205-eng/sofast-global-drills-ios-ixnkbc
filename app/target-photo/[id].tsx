@@ -7,7 +7,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { colors } from '@/styles/commonStyles';
 import { getDrillById } from '@/data/drills';
 import { IconSymbol } from '@/components/IconSymbol';
-import { TargetAnalyzer } from '@/services/targetAnalyzer';
+import { TargetAnalyzer, PhotoQualityIssue } from '@/services/targetAnalyzer';
 
 export default function TargetPhotoScreen() {
   const router = useRouter();
@@ -26,7 +26,9 @@ export default function TargetPhotoScreen() {
   const [targetType, setTargetType] = useState<'USPSA' | 'IDPA'>('USPSA');
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
-  const [validationType, setValidationType] = useState<'unrecognizable' | 'not-approved' | null>(null);
+  const [validationType, setValidationType] = useState<'quality' | 'unrecognizable' | 'not-approved' | null>(null);
+  const [qualityIssues, setQualityIssues] = useState<PhotoQualityIssue[]>([]);
+  const [recommendations, setRecommendations] = useState<string[]>([]);
   const cameraRef = useRef<any>(null);
 
   const handleTakePhoto = async () => {
@@ -73,6 +75,40 @@ export default function TargetPhotoScreen() {
     setShowValidationModal(false);
     setValidationMessage('');
     setValidationType(null);
+    setQualityIssues([]);
+    setRecommendations([]);
+  };
+
+  const getIssueIcon = (type: string) => {
+    switch (type) {
+      case 'blur':
+        return { ios: 'eye.slash.fill', android: 'blur_on' };
+      case 'lighting':
+        return { ios: 'lightbulb.fill', android: 'lightbulb' };
+      case 'visibility':
+        return { ios: 'viewfinder', android: 'visibility_off' };
+      case 'angle':
+        return { ios: 'rotate.3d', android: 'rotate_90_degrees_ccw' };
+      case 'distance':
+        return { ios: 'arrow.up.left.and.arrow.down.right', android: 'zoom_out_map' };
+      case 'resolution':
+        return { ios: 'photo.fill', android: 'high_quality' };
+      default:
+        return { ios: 'exclamationmark.triangle.fill', android: 'warning' };
+    }
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'high':
+        return '#EF4444';
+      case 'medium':
+        return '#F59E0B';
+      case 'low':
+        return '#3B82F6';
+      default:
+        return colors.textSecondary;
+    }
   };
 
   const handleAnalyze = async () => {
@@ -94,6 +130,23 @@ export default function TargetPhotoScreen() {
       );
 
       console.log('Analysis complete:', analysis);
+      
+      // Check if there are photo quality issues
+      if (analysis.photoQuality && !analysis.photoQuality.isGoodQuality) {
+        setValidationType('quality');
+        setQualityIssues(analysis.photoQuality.issues);
+        setRecommendations(analysis.photoQuality.recommendations);
+        
+        const primaryIssue = analysis.photoQuality.issues.find(i => i.severity === 'high') 
+          || analysis.photoQuality.issues[0];
+        
+        setValidationMessage(
+          primaryIssue?.message || 'The photo quality is not sufficient for accurate analysis.'
+        );
+        setShowValidationModal(true);
+        setIsAnalyzing(false);
+        return;
+      }
       
       // Check if the target is unrecognizable
       if (!analysis.isRecognizable) {
@@ -416,34 +469,103 @@ export default function TargetPhotoScreen() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <IconSymbol
-                ios_icon_name={validationType === 'unrecognizable' ? 'exclamationmark.triangle.fill' : 'info.circle.fill'}
-                android_material_icon_name={validationType === 'unrecognizable' ? 'warning' : 'info'}
+                ios_icon_name={
+                  validationType === 'quality' ? 'exclamationmark.triangle.fill' :
+                  validationType === 'unrecognizable' ? 'exclamationmark.triangle.fill' : 
+                  'info.circle.fill'
+                }
+                android_material_icon_name={
+                  validationType === 'quality' ? 'warning' :
+                  validationType === 'unrecognizable' ? 'warning' : 
+                  'info'
+                }
                 size={48}
-                color={validationType === 'unrecognizable' ? '#F59E0B' : '#3B82F6'}
+                color={
+                  validationType === 'quality' ? '#EF4444' :
+                  validationType === 'unrecognizable' ? '#F59E0B' : 
+                  '#3B82F6'
+                }
               />
               <Text style={styles.modalTitle}>
-                {validationType === 'unrecognizable' ? 'Photo Unrecognizable' : 'Non-Approved Target'}
+                {validationType === 'quality' ? 'Photo Quality Issue' :
+                 validationType === 'unrecognizable' ? 'Photo Unrecognizable' : 
+                 'Non-Approved Target'}
               </Text>
             </View>
 
             <ScrollView style={styles.modalBody}>
               <Text style={styles.modalMessage}>{validationMessage}</Text>
               
+              {/* Quality Issues Section */}
+              {validationType === 'quality' && qualityIssues.length > 0 && (
+                <View style={styles.issuesContainer}>
+                  <Text style={styles.issuesTitle}>Detected Issues:</Text>
+                  {qualityIssues.map((issue, index) => {
+                    const icon = getIssueIcon(issue.type);
+                    return (
+                      <View key={index} style={styles.issueItem}>
+                        <View style={styles.issueHeader}>
+                          <IconSymbol
+                            ios_icon_name={icon.ios}
+                            android_material_icon_name={icon.android}
+                            size={20}
+                            color={getSeverityColor(issue.severity)}
+                          />
+                          <Text style={[styles.issueType, { color: getSeverityColor(issue.severity) }]}>
+                            {issue.type.charAt(0).toUpperCase() + issue.type.slice(1)}
+                          </Text>
+                          <View style={[styles.severityBadge, { backgroundColor: getSeverityColor(issue.severity) }]}>
+                            <Text style={styles.severityText}>{issue.severity}</Text>
+                          </View>
+                        </View>
+                        <Text style={styles.issueMessage}>{issue.message}</Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+              
+              {/* Recommendations Section */}
+              {recommendations.length > 0 && (
+                <View style={styles.recommendationBox}>
+                  <View style={styles.recommendationHeader}>
+                    <IconSymbol
+                      ios_icon_name="lightbulb.fill"
+                      android_material_icon_name="tips_and_updates"
+                      size={20}
+                      color={colors.primary}
+                    />
+                    <Text style={styles.recommendationTitle}>How to Improve:</Text>
+                  </View>
+                  {recommendations.map((rec, index) => (
+                    <View key={index} style={styles.recommendationItem}>
+                      <Text style={styles.recommendationBullet}>•</Text>
+                      <Text style={styles.recommendationText}>{rec}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+              
+              {/* Target Recommendations for Non-Approved */}
               {validationType === 'not-approved' && (
                 <View style={styles.recommendationBox}>
                   <Text style={styles.recommendationTitle}>Recommended Targets:</Text>
-                  <Text style={styles.recommendationText}>
-                    • USPSA Classic Target (Official)
-                  </Text>
-                  <Text style={styles.recommendationText}>
-                    • USPSA Metric Target
-                  </Text>
-                  <Text style={styles.recommendationText}>
-                    • IDPA Target (Official)
-                  </Text>
-                  <Text style={styles.recommendationText}>
-                    • Available at shooting sports retailers
-                  </Text>
+                  <View style={styles.recommendationItem}>
+                    <Text style={styles.recommendationBullet}>•</Text>
+                    <Text style={styles.recommendationText}>USPSA Classic Target (Official)</Text>
+                  </View>
+                  <View style={styles.recommendationItem}>
+                    <Text style={styles.recommendationBullet}>•</Text>
+                    <Text style={styles.recommendationText}>USPSA Metric Target</Text>
+                  </View>
+                  <View style={styles.recommendationItem}>
+                    <Text style={styles.recommendationBullet}>•</Text>
+                    <Text style={styles.recommendationText}>IDPA Target (Official)</Text>
+                  </View>
+                  <View style={styles.recommendationItem}>
+                    <Text style={styles.recommendationBullet}>•</Text>
+                    <Text style={styles.recommendationText}>Available at shooting sports retailers</Text>
+                  </View>
                 </View>
               )}
             </ScrollView>
@@ -762,13 +884,57 @@ const styles = StyleSheet.create({
   },
   modalBody: {
     padding: 20,
-    maxHeight: 300,
+    maxHeight: 400,
   },
   modalMessage: {
     fontSize: 16,
     color: colors.textSecondary,
     lineHeight: 24,
     marginBottom: 16,
+  },
+  issuesContainer: {
+    marginBottom: 16,
+  },
+  issuesTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 12,
+  },
+  issueItem: {
+    backgroundColor: colors.background,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: colors.secondary,
+  },
+  issueHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+    gap: 8,
+  },
+  issueType: {
+    fontSize: 14,
+    fontWeight: '700',
+    flex: 1,
+  },
+  severityBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  severityText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textTransform: 'uppercase',
+  },
+  issueMessage: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    lineHeight: 18,
   },
   recommendationBox: {
     backgroundColor: colors.background,
@@ -777,17 +943,34 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.secondary,
   },
+  recommendationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
   recommendationTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: colors.text,
-    marginBottom: 12,
+  },
+  recommendationItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 6,
+    paddingLeft: 4,
+  },
+  recommendationBullet: {
+    fontSize: 16,
+    color: colors.primary,
+    marginRight: 8,
+    lineHeight: 22,
   },
   recommendationText: {
+    flex: 1,
     fontSize: 14,
     color: colors.textSecondary,
     lineHeight: 22,
-    marginBottom: 4,
   },
   modalActions: {
     padding: 20,

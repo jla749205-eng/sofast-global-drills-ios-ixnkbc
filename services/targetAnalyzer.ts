@@ -25,6 +25,20 @@ export interface HitAnalysis {
   confidence: number;
 }
 
+export interface PhotoQualityIssue {
+  type: 'blur' | 'lighting' | 'visibility' | 'angle' | 'distance' | 'resolution';
+  severity: 'low' | 'medium' | 'high';
+  message: string;
+  recommendation: string;
+}
+
+export interface PhotoQualityAssessment {
+  isGoodQuality: boolean;
+  overallScore: number; // 0-100
+  issues: PhotoQualityIssue[];
+  recommendations: string[];
+}
+
 export interface TargetAnalysisResult {
   totalHits: number;
   hits: HitAnalysis[];
@@ -40,6 +54,7 @@ export interface TargetAnalysisResult {
   isApprovedTarget: boolean;
   recognitionConfidence: number;
   targetValidationMessage?: string;
+  photoQuality?: PhotoQualityAssessment;
 }
 
 // USPSA Target Zones (Classic Target)
@@ -71,6 +86,140 @@ export class TargetAnalyzer {
   }
 
   /**
+   * Assess photo quality automatically
+   * 
+   * PRODUCTION IMPLEMENTATION:
+   * This should use AI vision to analyze:
+   * 1. Image sharpness/blur detection
+   * 2. Lighting conditions (too dark, overexposed, shadows)
+   * 3. Target visibility (entire target in frame)
+   * 4. Camera angle (straight on vs skewed)
+   * 5. Distance (too far, too close)
+   * 6. Resolution quality
+   */
+  private async assessPhotoQuality(imageUri: string): Promise<PhotoQualityAssessment> {
+    console.log('Assessing photo quality...');
+    
+    // TODO: In production, use AI vision API to assess image quality
+    // For now, simulate quality assessment with various scenarios
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    const issues: PhotoQualityIssue[] = [];
+    const recommendations: string[] = [];
+    
+    // Simulate different quality scenarios
+    const scenario = Math.random();
+    
+    // 20% chance of blur issues
+    if (scenario < 0.2) {
+      issues.push({
+        type: 'blur',
+        severity: 'high',
+        message: 'The image appears blurry or out of focus',
+        recommendation: 'Hold the camera steady and ensure the target is in focus before taking the photo. Consider using a tripod or stable surface.',
+      });
+      recommendations.push('Hold the camera steady or use a stable surface');
+      recommendations.push('Ensure the target is in focus before capturing');
+      recommendations.push('Tap on the target in the camera view to focus');
+    }
+    
+    // 15% chance of lighting issues
+    if (scenario >= 0.2 && scenario < 0.35) {
+      const isDark = Math.random() > 0.5;
+      issues.push({
+        type: 'lighting',
+        severity: 'high',
+        message: isDark ? 'The image is too dark' : 'The image is overexposed',
+        recommendation: isDark 
+          ? 'Ensure there is adequate lighting on the target. Use natural light or add additional lighting sources.'
+          : 'Reduce direct lighting or move to avoid glare. Avoid photographing with bright lights directly behind the target.',
+      });
+      recommendations.push(isDark 
+        ? 'Add more lighting to the target area'
+        : 'Reduce direct lighting or avoid glare'
+      );
+      recommendations.push('Position yourself to avoid shadows on the target');
+    }
+    
+    // 15% chance of visibility issues
+    if (scenario >= 0.35 && scenario < 0.5) {
+      issues.push({
+        type: 'visibility',
+        severity: 'high',
+        message: 'The entire target is not visible in the frame',
+        recommendation: 'Step back or adjust the camera position to ensure the entire target is visible within the frame. All edges of the target should be clearly visible.',
+      });
+      recommendations.push('Step back to capture the entire target');
+      recommendations.push('Ensure all edges of the target are visible');
+      recommendations.push('Use the guide frame to align the target');
+    }
+    
+    // 10% chance of angle issues
+    if (scenario >= 0.5 && scenario < 0.6) {
+      issues.push({
+        type: 'angle',
+        severity: 'medium',
+        message: 'The target appears to be photographed at an angle',
+        recommendation: 'Position yourself directly in front of the target. The camera should be perpendicular to the target surface for accurate analysis.',
+      });
+      recommendations.push('Stand directly in front of the target');
+      recommendations.push('Keep the camera perpendicular to the target');
+      recommendations.push('Avoid photographing from the side');
+    }
+    
+    // 10% chance of distance issues
+    if (scenario >= 0.6 && scenario < 0.7) {
+      const isTooFar = Math.random() > 0.5;
+      issues.push({
+        type: 'distance',
+        severity: 'medium',
+        message: isTooFar ? 'The target is too far away' : 'The camera is too close to the target',
+        recommendation: isTooFar
+          ? 'Move closer to the target to capture more detail. The target should fill most of the frame.'
+          : 'Step back from the target. Leave some space around the edges for better analysis.',
+      });
+      recommendations.push(isTooFar 
+        ? 'Move closer to the target'
+        : 'Step back from the target'
+      );
+      recommendations.push('The target should fill 70-80% of the frame');
+    }
+    
+    // 5% chance of resolution issues
+    if (scenario >= 0.7 && scenario < 0.75) {
+      issues.push({
+        type: 'resolution',
+        severity: 'medium',
+        message: 'The image resolution is too low',
+        recommendation: 'Check your camera settings and ensure you are using the highest quality setting available. Clean the camera lens if necessary.',
+      });
+      recommendations.push('Use the highest camera quality setting');
+      recommendations.push('Clean the camera lens');
+      recommendations.push('Ensure good lighting for better image quality');
+    }
+
+    // Calculate overall quality score
+    const highSeverityCount = issues.filter(i => i.severity === 'high').length;
+    const mediumSeverityCount = issues.filter(i => i.severity === 'medium').length;
+    const lowSeverityCount = issues.filter(i => i.severity === 'low').length;
+    
+    let overallScore = 100;
+    overallScore -= highSeverityCount * 30;
+    overallScore -= mediumSeverityCount * 15;
+    overallScore -= lowSeverityCount * 5;
+    overallScore = Math.max(0, overallScore);
+
+    const isGoodQuality = overallScore >= 70 && highSeverityCount === 0;
+
+    return {
+      isGoodQuality,
+      overallScore,
+      issues,
+      recommendations,
+    };
+  }
+
+  /**
    * Validate if the image is recognizable and contains an approved target
    * 
    * PRODUCTION IMPLEMENTATION:
@@ -89,43 +238,51 @@ export class TargetAnalyzer {
     recognitionConfidence: number;
     detectedTargetType?: 'USPSA' | 'IDPA' | 'UNKNOWN';
     validationMessage?: string;
+    photoQuality?: PhotoQualityAssessment;
   }> {
     console.log('Validating target image...');
     
-    // TODO: In production, use AI vision API to validate the image
-    // For now, simulate validation with random results for demonstration
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Simulate different validation scenarios
-    const scenario = Math.random();
+    // First, assess photo quality
+    const photoQuality = await this.assessPhotoQuality(imageUri);
     
-    // 10% chance of unrecognizable image
-    if (scenario < 0.1) {
+    // If photo quality is poor, return early with quality issues
+    if (!photoQuality.isGoodQuality) {
+      const primaryIssue = photoQuality.issues.find(i => i.severity === 'high') || photoQuality.issues[0];
       return {
         isRecognizable: false,
         isApprovedTarget: false,
-        recognitionConfidence: 0.3,
-        validationMessage: 'The image is too blurry or poorly lit to recognize the target. Please retake the photo with better lighting and ensure the target is in focus.',
+        recognitionConfidence: photoQuality.overallScore / 100,
+        validationMessage: primaryIssue?.message || 'The photo quality is not sufficient for analysis.',
+        photoQuality,
       };
     }
     
-    // 15% chance of non-approved target
-    if (scenario < 0.25) {
+    // TODO: In production, use AI vision API to validate the image
+    // For now, simulate validation with random results for demonstration
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Simulate different validation scenarios (only for good quality photos)
+    const scenario = Math.random();
+    
+    // 15% chance of non-approved target (even with good quality)
+    if (scenario < 0.15) {
       return {
         isRecognizable: true,
         isApprovedTarget: false,
         recognitionConfidence: 0.85,
         detectedTargetType: 'UNKNOWN',
         validationMessage: `This does not appear to be an approved ${expectedTargetType} target. For accurate scoring, please use an official ${expectedTargetType} target. You can purchase approved targets from major shooting sports retailers.`,
+        photoQuality,
       };
     }
     
-    // 75% chance of valid target
+    // 85% chance of valid target with good quality
     return {
       isRecognizable: true,
       isApprovedTarget: true,
       recognitionConfidence: 0.92,
       detectedTargetType: expectedTargetType,
+      photoQuality,
     };
   }
 
@@ -175,7 +332,7 @@ export class TargetAnalyzer {
       console.log(`Analyzing ${targetType} target with ${expectedHits} expected hits`);
       console.log('Image URI:', imageUri);
 
-      // First, validate the target image
+      // First, validate the target image (includes quality assessment)
       const validation = await this.validateTargetImage(imageUri, targetType);
       
       // If image is not recognizable or not an approved target, return validation result
@@ -195,6 +352,7 @@ export class TargetAnalyzer {
           isApprovedTarget: validation.isApprovedTarget,
           recognitionConfidence: validation.recognitionConfidence,
           targetValidationMessage: validation.validationMessage,
+          photoQuality: validation.photoQuality,
         };
       }
 
@@ -211,6 +369,7 @@ export class TargetAnalyzer {
         isRecognizable: validation.isRecognizable,
         isApprovedTarget: validation.isApprovedTarget,
         recognitionConfidence: validation.recognitionConfidence,
+        photoQuality: validation.photoQuality,
       };
       
       console.log('Target analysis complete:', result);
@@ -228,7 +387,7 @@ export class TargetAnalyzer {
   private generateMockAnalysis(
     targetType: 'USPSA' | 'IDPA',
     expectedHits: number
-  ): Omit<TargetAnalysisResult, 'isRecognizable' | 'isApprovedTarget' | 'recognitionConfidence'> {
+  ): Omit<TargetAnalysisResult, 'isRecognizable' | 'isApprovedTarget' | 'recognitionConfidence' | 'photoQuality'> {
     const hits: HitAnalysis[] = [];
     let alphaHits = 0;
     let charlieHits = 0;
