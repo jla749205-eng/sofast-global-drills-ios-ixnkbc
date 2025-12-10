@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Natively",
-    "slug": "Natively",
+    "name": "SOFAST Global",
+    "slug": "sofast-global",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/natively-dark.png",
@@ -34,7 +34,21 @@
     "plugins": [
       "expo-font",
       "expo-router",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow SOFAST Global to access your camera for drill recording.",
+          "microphonePermission": "Allow SOFAST Global to access your microphone for shot detection.",
+          "recordAudioAndroid": true
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Allow SOFAST Global to access your microphone for shot detection."
+        }
+      ]
     ],
     "scheme": "natively",
     "experiments": {

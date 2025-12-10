@@ -8,14 +8,14 @@ export default function TabLayout() {
     {
       name: '(home)',
       route: '/(tabs)/(home)/',
-      icon: 'home',
-      label: 'Home',
+      icon: 'target',
+      label: 'Drills',
     },
     {
       name: 'profile',
       route: '/(tabs)/profile',
-      icon: 'person',
-      label: 'Profile',
+      icon: 'trophy',
+      label: 'Leaderboard',
     },
   ];
 

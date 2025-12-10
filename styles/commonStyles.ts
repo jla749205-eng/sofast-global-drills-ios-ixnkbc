@@ -1,14 +1,14 @@
 import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
 
 export const colors = {
-  primary: '#162456',    // Material Blue
-  secondary: '#193cb8',  // Darker Blue
-  accent: '#64B5F6',     // Light Blue
-  background: '#101824',  // Keeping dark background
-  backgroundAlt: '#162133',  // Keeping dark background
-  text: '#e3e3e3',       // Keeping light text
-  grey: '#90CAF9',       // Light Blue Grey
-  card: '#193cb8',       // Keeping dark card background
+  background: '#1E293B',      // Dark grayish-blue, reminiscent of tactical gear
+  text: '#F0F9FF',            // Off-white, for high readability against the dark background
+  textSecondary: '#CBD5E1',   // Light gray-blue, for less important information
+  primary: '#A3E635',         // Lime green, representing precision and accuracy
+  secondary: '#64748B',       // Medium gray-blue, for neutral elements
+  accent: '#FACC15',          // Yellow, for highlights and important actions
+  card: '#334155',            // Darker grayish-blue, for card backgrounds
+  highlight: '#84CC16',       // Bright green, for selected elements
 };
 
 export const buttonStyles = StyleSheet.create({
