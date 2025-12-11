@@ -171,6 +171,32 @@ export default function HomeScreen() {
           )}
         </View>
 
+        {/* BIG APP STORE BUTTON */}
+        <TouchableOpacity
+          style={styles.appStoreButton}
+          onPress={() => router.push('/launch-guide')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.appStoreButtonContent}>
+            <IconSymbol
+              ios_icon_name="rocket.fill"
+              android_material_icon_name="rocket_launch"
+              size={40}
+              color="#fff"
+            />
+            <View style={styles.appStoreButtonTextContainer}>
+              <Text style={styles.appStoreButtonTitle}>GET MY APP IN THE APP STORE</Text>
+              <Text style={styles.appStoreButtonSubtitle}>Tap here for simple step-by-step instructions</Text>
+            </View>
+            <IconSymbol
+              ios_icon_name="chevron.right"
+              android_material_icon_name="chevron_right"
+              size={32}
+              color="#fff"
+            />
+          </View>
+        </TouchableOpacity>
+
         {/* Features Banner */}
         <View style={styles.featuresBanner}>
           <View style={styles.featureItem}>
@@ -318,6 +344,41 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.accent,
     letterSpacing: 1,
+  },
+  appStoreButton: {
+    backgroundColor: '#FF3B30',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    borderWidth: 3,
+    borderColor: '#FF6B60',
+    shadowColor: '#FF3B30',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  appStoreButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  appStoreButtonTextContainer: {
+    flex: 1,
+  },
+  appStoreButtonTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#fff',
+    marginBottom: 4,
+    letterSpacing: 0.5,
+  },
+  appStoreButtonSubtitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#fff',
+    opacity: 0.9,
+    lineHeight: 18,
   },
   featuresBanner: {
     flexDirection: 'row',

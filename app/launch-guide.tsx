@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Alert } from 'react-native';
-import { Stack, router } from 'expo-router';
+import { Stack } from 'expo-router';
 import { colors } from '../styles/commonStyles';
 import { IconSymbol } from '../components/IconSymbol';
 
@@ -32,36 +32,28 @@ export default function LaunchGuideScreen() {
   const steps = [
     {
       number: 1,
-      title: 'Check Your Apple Developer Account',
-      description: 'Make sure you\'re signed in to your Apple Developer account (you already have this!)',
-      buttonText: 'Open Apple Developer',
+      title: 'You Already Have Apple Developer ✓',
+      description: 'Great! You mentioned you already have an Apple Developer account and App Store Connect access. That\'s the hardest part done!',
+      buttonText: 'Check My Apple Developer',
       url: 'https://developer.apple.com/account',
       showCheckbox: true
     },
     {
       number: 2,
-      title: 'Check App Store Connect',
-      description: 'Make sure you can access App Store Connect (you already have this too!)',
-      buttonText: 'Open App Store Connect',
-      url: 'https://appstoreconnect.apple.com',
+      title: 'Create 3 Simple Web Pages',
+      description: 'Apple requires 3 URLs: Privacy Policy, Support Page, and Marketing Page. These can be VERY simple - just a few sentences each!',
+      buttonText: 'Create Free Pages (GitHub)',
+      url: 'https://pages.github.com',
+      tip: 'Alternative: Use Google Sites (google.com/sites) - it\'s even easier! Just create 3 pages with basic text.',
       showCheckbox: true
     },
     {
       number: 3,
-      title: 'Create URLs for Your App',
-      description: 'You need 3 simple web pages: Privacy Policy, Support Page, and Marketing Page. You can create these for free.',
-      buttonText: 'How to Create Free Pages',
-      url: 'https://pages.github.com',
-      tip: 'Tip: Use GitHub Pages (free) or Google Sites (free) to create these pages. They can be very simple!',
-      showCheckbox: true
-    },
-    {
-      number: 4,
-      title: 'Contact Natively Support for Build',
-      description: 'The Natively team will help you build and submit your app. They handle all the technical stuff!',
-      buttonText: 'Get Build Help',
-      url: 'mailto:support@natively.app?subject=Help%20with%20SOFAST%20Global%20App%20Submission',
-      tip: 'Just email them and they\'ll walk you through it step by step.',
+      title: 'Email Natively Support',
+      description: 'This is the EASIEST step. Just click the button below to email the Natively team. They will build your app and help you submit it to the App Store. They do all the technical work!',
+      buttonText: 'Email Natively Support Now',
+      url: 'mailto:support@natively.app?subject=Ready%20to%20Submit%20SOFAST%20Global%20to%20App%20Store&body=Hi%20Natively%20Team%2C%0A%0AI%27m%20ready%20to%20get%20my%20SOFAST%20Global%20app%20into%20the%20App%20Store.%20%0A%0AMy%20Apple%20Developer%20Account%20Email%3A%20%5BYOUR%20EMAIL%5D%0A%0AMy%203%20URLs%3A%0APrivacy%20Policy%3A%20%5BYOUR%20URL%5D%0ASupport%20Page%3A%20%5BYOUR%20URL%5D%0AMarketing%20Page%3A%20%5BYOUR%20URL%5D%0A%0APlease%20help%20me%20build%20and%20submit%20my%20app!%0A%0AThanks%21',
+      tip: 'The email template is already filled out for you! Just add your information and send it.',
       showCheckbox: false
     }
   ];
@@ -70,7 +62,7 @@ export default function LaunchGuideScreen() {
     <View style={styles.container}>
       <Stack.Screen 
         options={{
-          title: 'Launch Your App',
+          title: 'Get Your App in the Store',
           headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.text,
         }}
@@ -81,12 +73,25 @@ export default function LaunchGuideScreen() {
           <IconSymbol 
             ios_icon_name="rocket.fill" 
             android_material_icon_name="rocket_launch"
-            size={48}
-            color={colors.primary}
+            size={64}
+            color="#FF3B30"
           />
-          <Text style={styles.title}>Simple Launch Guide</Text>
+          <Text style={styles.title}>3 Simple Steps</Text>
           <Text style={styles.subtitle}>
-            Just click the buttons below - they'll take you exactly where you need to go!
+            Just tap the buttons below. They open automatically - no technical knowledge needed!
+          </Text>
+        </View>
+
+        <View style={styles.importantBox}>
+          <IconSymbol 
+            ios_icon_name="exclamationmark.triangle.fill" 
+            android_material_icon_name="warning"
+            size={24}
+            color="#FF9500"
+          />
+          <Text style={styles.importantText}>
+            <Text style={styles.importantBold}>IMPORTANT: </Text>
+            You don&apos;t build the app yourself! The Natively team builds it for you. You just need to provide the 3 URLs and they handle everything else.
           </Text>
         </View>
 
@@ -129,7 +134,7 @@ export default function LaunchGuideScreen() {
             )}
 
             <TouchableOpacity 
-              style={styles.actionButton}
+              style={[styles.actionButton, step.number === 3 && styles.actionButtonHighlight]}
               onPress={() => openLink(step.url, step.title)}
             >
               <Text style={styles.actionButtonText}>{step.buttonText}</Text>
@@ -145,26 +150,39 @@ export default function LaunchGuideScreen() {
 
         <View style={styles.helpCard}>
           <IconSymbol 
-            ios_icon_name="person.fill.questionmark" 
-            android_material_icon_name="help"
-            size={32}
+            ios_icon_name="person.fill.checkmark" 
+            android_material_icon_name="support_agent"
+            size={48}
             color={colors.primary}
           />
-          <Text style={styles.helpTitle}>Still Confused?</Text>
+          <Text style={styles.helpTitle}>Still Confused? That&apos;s OK!</Text>
           <Text style={styles.helpText}>
-            That's totally okay! Just email the Natively support team and they'll help you through every single step.
+            Seriously, don&apos;t worry. Just email the support team and tell them you&apos;re confused. They&apos;ll walk you through it step by step. That&apos;s what they&apos;re there for!
           </Text>
           <TouchableOpacity 
             style={styles.helpButton}
-            onPress={() => openLink('mailto:support@natively.app?subject=Need%20Help%20Launching%20My%20App', 'Email Support')}
+            onPress={() => openLink('mailto:support@natively.app?subject=I%27m%20Confused%20About%20App%20Store%20Submission&body=Hi%2C%0A%0AI%27m%20trying%20to%20get%20my%20SOFAST%20Global%20app%20into%20the%20App%20Store%20but%20I%27m%20confused.%20Can%20you%20help%20me%3F%0A%0AThanks%21', 'Email Support')}
           >
-            <Text style={styles.helpButtonText}>Email Support</Text>
+            <Text style={styles.helpButtonText}>Email: &quot;I&apos;m Confused, Help!&quot;</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.footer}>
+          <Text style={styles.footerTitle}>What Happens Next?</Text>
           <Text style={styles.footerText}>
-            💡 Remember: You don't need to understand the technical stuff. The support team will handle it!
+            1. You send the email to Natively support{'\n'}
+            2. They build your app (takes 1-2 days){'\n'}
+            3. They send you a link to review it{'\n'}
+            4. You approve it{'\n'}
+            5. They submit it to Apple{'\n'}
+            6. Apple reviews it (takes 1-7 days){'\n'}
+            7. Your app is LIVE in the App Store! 🎉
+          </Text>
+        </View>
+
+        <View style={styles.finalNote}>
+          <Text style={styles.finalNoteText}>
+            💡 You don&apos;t need to understand any technical terms. You don&apos;t need to know what &quot;app.json&quot; or &quot;eas.json&quot; means. The support team handles ALL of that!
           </Text>
         </View>
       </ScrollView>
@@ -190,18 +208,39 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 32,
+    fontWeight: '900',
     color: colors.text,
     marginTop: 16,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 17,
     color: colors.textSecondary,
     marginTop: 8,
     textAlign: 'center',
     lineHeight: 24,
+    paddingHorizontal: 20,
+  },
+  importantBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#FFF3CD',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: '#FF9500',
+  },
+  importantText: {
+    flex: 1,
+    fontSize: 15,
+    color: '#856404',
+    marginLeft: 12,
+    lineHeight: 22,
+  },
+  importantBold: {
+    fontWeight: '900',
   },
   stepCard: {
     backgroundColor: colors.surface,
@@ -218,22 +257,22 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   stepNumberCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   stepNumberText: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '900',
     color: '#fff',
   },
   checkbox: {
-    width: 28,
-    height: 28,
-    borderRadius: 6,
+    width: 32,
+    height: 32,
+    borderRadius: 8,
     borderWidth: 2,
     borderColor: colors.border,
     justifyContent: 'center',
@@ -244,30 +283,31 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
   },
   stepTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '800',
     color: colors.text,
-    marginBottom: 8,
+    marginBottom: 10,
+    lineHeight: 28,
   },
   stepDescription: {
-    fontSize: 15,
+    fontSize: 16,
     color: colors.textSecondary,
-    lineHeight: 22,
+    lineHeight: 24,
     marginBottom: 12,
   },
   tipBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     backgroundColor: `${colors.primary}15`,
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12,
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 14,
   },
   tipText: {
     flex: 1,
     fontSize: 14,
     color: colors.text,
-    marginLeft: 8,
+    marginLeft: 10,
     lineHeight: 20,
   },
   actionButton: {
@@ -275,59 +315,87 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: colors.primary,
-    padding: 16,
+    padding: 18,
     borderRadius: 12,
     marginTop: 8,
   },
+  actionButtonHighlight: {
+    backgroundColor: '#FF3B30',
+    borderWidth: 2,
+    borderColor: '#FF6B60',
+  },
   actionButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
     color: '#fff',
   },
   helpCard: {
     backgroundColor: colors.surface,
     borderRadius: 16,
-    padding: 24,
+    padding: 28,
     alignItems: 'center',
     marginTop: 20,
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: colors.primary,
   },
   helpTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: '900',
     color: colors.text,
-    marginTop: 12,
-    marginBottom: 8,
+    marginTop: 16,
+    marginBottom: 12,
+    textAlign: 'center',
   },
   helpText: {
-    fontSize: 15,
+    fontSize: 16,
     color: colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 16,
+    lineHeight: 24,
+    marginBottom: 20,
   },
   helpButton: {
     backgroundColor: colors.primary,
     paddingHorizontal: 32,
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: 12,
   },
   helpButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
     color: '#fff',
   },
   footer: {
     marginTop: 30,
-    padding: 20,
+    padding: 24,
     backgroundColor: `${colors.primary}10`,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  footerTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.text,
+    marginBottom: 12,
   },
   footerText: {
     fontSize: 15,
     color: colors.text,
+    lineHeight: 26,
+  },
+  finalNote: {
+    marginTop: 20,
+    padding: 20,
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.border,
+  },
+  finalNoteText: {
+    fontSize: 15,
+    color: colors.text,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 24,
+    fontStyle: 'italic',
   },
 });
