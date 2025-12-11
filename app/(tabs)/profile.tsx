@@ -1,244 +1,122 @@
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Image, Alert } from 'react-native';
-import { colors } from '@/styles/commonStyles';
-import { IconSymbol } from '@/components/IconSymbol';
-import * as Linking from 'expo-linking';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { Stack, router } from 'expo-router';
+import { colors } from '../../styles/commonStyles';
+import { IconSymbol } from '../../components/IconSymbol';
 
-type Division = 'Open' | 'Vet' | 'LE';
-
-export default function LeaderboardScreen() {
-  const [selectedDivision, setSelectedDivision] = useState<Division>('Open');
-
-  const divisions: Division[] = ['Open', 'Vet', 'LE'];
-
-  // Placeholder leaderboard data
-  const leaderboardData = [
-    { rank: 1, name: 'John Doe', score: 95.5, time: 8.23, isVeteran: false },
-    { rank: 2, name: 'Jane Smith', score: 94.2, time: 8.45, isVeteran: true },
-    { rank: 3, name: 'Mike Johnson', score: 93.8, time: 8.67, isVeteran: false },
-    { rank: 4, name: 'Sarah Williams', score: 92.5, time: 8.89, isVeteran: false },
-    { rank: 5, name: 'Tom Brown', score: 91.3, time: 9.12, isVeteran: true },
-  ];
-
-  const handleInstagramPress = async () => {
-    const instagramUsername = 'team_sofast';
-    const instagramAppUrl = `instagram://user?username=${instagramUsername}`;
-    const instagramWebUrl = `https://www.instagram.com/${instagramUsername}`;
-
-    try {
-      const canOpen = await Linking.canOpenURL(instagramAppUrl);
-      if (canOpen) {
-        await Linking.openURL(instagramAppUrl);
-      } else {
-        await Linking.openURL(instagramWebUrl);
-      }
-    } catch (error) {
-      console.log('Error opening Instagram:', error);
-      Alert.alert('Error', 'Could not open Instagram. Please try again later.');
-    }
+export default function ProfileScreen() {
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Logout', style: 'destructive', onPress: () => console.log('Logout') }
+      ]
+    );
   };
+
+  const menuItems = [
+    {
+      title: '🚀 Launch Guide',
+      subtitle: 'Simple steps to get your app on the App Store',
+      icon: 'rocket.fill',
+      androidIcon: 'rocket_launch',
+      action: () => router.push('/launch-guide'),
+      highlighted: true
+    },
+    {
+      title: 'Subscription',
+      subtitle: 'Manage your subscription',
+      icon: 'star.fill',
+      androidIcon: 'star',
+      action: () => Alert.alert('Subscription', 'Coming soon!')
+    },
+    {
+      title: 'Settings',
+      subtitle: 'App preferences',
+      icon: 'gear',
+      androidIcon: 'settings',
+      action: () => Alert.alert('Settings', 'Coming soon!')
+    },
+    {
+      title: 'Help & Support',
+      subtitle: 'Get help or contact us',
+      icon: 'questionmark.circle',
+      androidIcon: 'help',
+      action: () => Alert.alert('Support', 'Email: support@sofast.com')
+    }
+  ];
 
   return (
     <View style={styles.container}>
-      {/* Header with Logo */}
-      <View style={styles.header}>
-        <Image
-          source={require('@/assets/images/7cadd481-5bea-470d-802a-1f44d5a96178.jpeg')}
-          style={styles.logoImage}
-          resizeMode="contain"
-        />
-        <Text style={styles.headerTitle}>Global Leaderboard</Text>
-        <Text style={styles.headerSubtitle}>Compete with shooters worldwide</Text>
-      </View>
-
-      {/* Division Selector */}
-      <View style={styles.divisionSelector}>
-        {divisions.map((division) => (
-          <TouchableOpacity
-            key={division}
-            style={[
-              styles.divisionButton,
-              selectedDivision === division && styles.divisionButtonActive
-            ]}
-            onPress={() => setSelectedDivision(division)}
-            activeOpacity={0.7}
-          >
-            <Text style={[
-              styles.divisionButtonText,
-              selectedDivision === division && styles.divisionButtonTextActive
-            ]}>
-              {division}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Social Media Section */}
-        <View style={styles.socialSection}>
-          <Text style={styles.sectionTitle}>JOIN OUR COMMUNITY</Text>
-          <TouchableOpacity
-            style={styles.socialCard}
-            onPress={handleInstagramPress}
-            activeOpacity={0.7}
-          >
-            <View style={styles.socialIconContainer}>
-              <IconSymbol
-                ios_icon_name="camera.fill"
-                android_material_icon_name="photo_camera"
-                size={32}
-                color={colors.accent}
-              />
-            </View>
-            <View style={styles.socialContent}>
-              <Text style={styles.socialTitle}>Follow us on Instagram</Text>
-              <Text style={styles.socialHandle}>@team_sofast</Text>
-              <Text style={styles.socialDescription}>
-                Get training tips, competition updates, and connect with the SOFAST community
-              </Text>
-            </View>
-            <IconSymbol
-              ios_icon_name="chevron.right"
-              android_material_icon_name="chevron_right"
-              size={24}
-              color={colors.textSecondary}
+      <Stack.Screen 
+        options={{
+          title: 'Profile',
+          headerStyle: { backgroundColor: colors.background },
+          headerTintColor: colors.text,
+        }}
+      />
+      
+      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        <View style={styles.profileHeader}>
+          <View style={styles.avatarContainer}>
+            <IconSymbol 
+              ios_icon_name="person.circle.fill" 
+              android_material_icon_name="account_circle"
+              size={80}
+              color={colors.primary}
             />
-          </TouchableOpacity>
+          </View>
+          <Text style={styles.nameText}>SOFAST User</Text>
+          <Text style={styles.emailText}>shooter@sofast.com</Text>
         </View>
 
-        {/* Coming Soon Notice */}
-        <View style={styles.comingSoonCard}>
-          <IconSymbol
-            ios_icon_name="cloud.fill"
-            android_material_icon_name="cloud"
-            size={48}
-            color={colors.primary}
-          />
-          <Text style={styles.comingSoonTitle}>Firebase Integration Coming Soon</Text>
-          <Text style={styles.comingSoonText}>
-            Global rankings with real-time updates will be available in the next update. 
-            Compete in Open, Veteran, and Law Enforcement divisions.
-          </Text>
-        </View>
-
-        {/* Placeholder Leaderboard */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>PREVIEW - {selectedDivision.toUpperCase()} DIVISION</Text>
-          
-          {leaderboardData.map((entry) => (
-            <View key={entry.rank} style={styles.leaderboardItem}>
-              <View style={styles.rankContainer}>
-                {entry.rank <= 3 ? (
-                  <IconSymbol
-                    ios_icon_name="trophy.fill"
-                    android_material_icon_name="emoji_events"
+        <View style={styles.menuSection}>
+          {menuItems.map((item, index) => (
+            <TouchableOpacity 
+              key={index}
+              style={[styles.menuItem, item.highlighted && styles.menuItemHighlighted]}
+              onPress={item.action}
+            >
+              <View style={styles.menuItemLeft}>
+                <View style={[styles.iconContainer, item.highlighted && styles.iconContainerHighlighted]}>
+                  <IconSymbol 
+                    ios_icon_name={item.icon} 
+                    android_material_icon_name={item.androidIcon}
                     size={24}
-                    color={
-                      entry.rank === 1 ? '#FFD700' :
-                      entry.rank === 2 ? '#C0C0C0' :
-                      '#CD7F32'
-                    }
+                    color={item.highlighted ? '#fff' : colors.text}
                   />
-                ) : (
-                  <Text style={styles.rankNumber}>{entry.rank}</Text>
-                )}
-              </View>
-
-              <View style={styles.playerInfo}>
-                <View style={styles.playerNameContainer}>
-                  <Text style={styles.playerName}>{entry.name}</Text>
-                  {entry.isVeteran && (
-                    <View style={styles.veteranBadge}>
-                      <IconSymbol
-                        ios_icon_name="star.fill"
-                        android_material_icon_name="star"
-                        size={12}
-                        color={colors.accent}
-                      />
-                    </View>
-                  )}
                 </View>
-                <View style={styles.playerStats}>
-                  <Text style={styles.playerStatText}>Score: {entry.score}</Text>
-                  <Text style={styles.playerStatText}>Time: {entry.time}s</Text>
+                <View style={styles.menuItemText}>
+                  <Text style={[styles.menuItemTitle, item.highlighted && styles.menuItemTitleHighlighted]}>
+                    {item.title}
+                  </Text>
+                  <Text style={[styles.menuItemSubtitle, item.highlighted && styles.menuItemSubtitleHighlighted]}>
+                    {item.subtitle}
+                  </Text>
                 </View>
               </View>
-            </View>
+              <IconSymbol 
+                ios_icon_name="chevron.right" 
+                android_material_icon_name="chevron_right"
+                size={20}
+                color={item.highlighted ? colors.primary : colors.textSecondary}
+              />
+            </TouchableOpacity>
           ))}
         </View>
 
-        {/* Features List */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>UPCOMING FEATURES</Text>
-          
-          <View style={styles.featureCard}>
-            <IconSymbol
-              ios_icon_name="checkmark.circle.fill"
-              android_material_icon_name="check_circle"
-              size={24}
-              color={colors.primary}
-            />
-            <View style={styles.featureContent}>
-              <Text style={styles.featureTitle}>Real-time Rankings</Text>
-              <Text style={styles.featureText}>
-                See your position update instantly as you complete drills
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.featureCard}>
-            <IconSymbol
-              ios_icon_name="person.3.fill"
-              android_material_icon_name="groups"
-              size={24}
-              color={colors.primary}
-            />
-            <View style={styles.featureContent}>
-              <Text style={styles.featureTitle}>Division Brackets</Text>
-              <Text style={styles.featureText}>
-                Compete fairly in Open, Veteran, and Law Enforcement divisions
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.featureCard}>
-            <IconSymbol
-              ios_icon_name="chart.bar.fill"
-              android_material_icon_name="bar_chart"
-              size={24}
-              color={colors.primary}
-            />
-            <View style={styles.featureContent}>
-              <Text style={styles.featureTitle}>Performance Analytics</Text>
-              <Text style={styles.featureText}>
-                Track your progress and compare with top shooters
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.featureCard}>
-            <IconSymbol
-              ios_icon_name="wifi"
-              android_material_icon_name="wifi"
-              size={24}
-              color={colors.primary}
-            />
-            <View style={styles.featureContent}>
-              <Text style={styles.featureTitle}>Offline Sync</Text>
-              <Text style={styles.featureText}>
-                Record drills offline and sync when connected
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Bottom padding for tab bar */}
-        <View style={{ height: 120 }} />
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <IconSymbol 
+            ios_icon_name="arrow.right.square" 
+            android_material_icon_name="logout"
+            size={20}
+            color="#ff4444"
+          />
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -249,215 +127,94 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  header: {
-    alignItems: 'center',
-    paddingTop: Platform.OS === 'android' ? 48 : 60,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.secondary,
-  },
-  logoImage: {
-    width: 60,
-    height: 60,
-    marginBottom: 12,
-    borderRadius: 30,
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '900',
-    color: colors.text,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginTop: 4,
-  },
-  divisionSelector: {
-    flexDirection: 'row',
-    padding: 16,
-    gap: 8,
-  },
-  divisionButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: colors.card,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.secondary,
-  },
-  divisionButtonActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  divisionButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.textSecondary,
-  },
-  divisionButtonTextActive: {
-    color: colors.background,
-  },
-  scrollView: {
+  content: {
     flex: 1,
   },
-  scrollContent: {
-    paddingHorizontal: 16,
-  },
-  socialSection: {
-    marginBottom: 24,
-  },
-  socialCard: {
-    flexDirection: 'row',
-    backgroundColor: colors.card,
-    borderRadius: 12,
+  contentContainer: {
     padding: 20,
+    paddingBottom: 100,
+  },
+  profileHeader: {
     alignItems: 'center',
-    gap: 16,
-    borderWidth: 2,
-    borderColor: colors.accent,
-    boxShadow: '0px 4px 8px rgba(163, 230, 53, 0.2)',
-    elevation: 4,
+    paddingVertical: 30,
   },
-  socialIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: colors.accent,
+  avatarContainer: {
+    marginBottom: 16,
   },
-  socialContent: {
-    flex: 1,
-  },
-  socialTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+  nameText: {
+    fontSize: 24,
+    fontWeight: 'bold',
     color: colors.text,
     marginBottom: 4,
   },
-  socialHandle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: colors.accent,
-    marginBottom: 6,
-  },
-  socialDescription: {
-    fontSize: 13,
+  emailText: {
+    fontSize: 15,
     color: colors.textSecondary,
-    lineHeight: 18,
   },
-  comingSoonCard: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 24,
+  menuSection: {
+    marginTop: 20,
+  },
+  menuItem: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    justifyContent: 'space-between',
+    backgroundColor: colors.surface,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  menuItemHighlighted: {
+    backgroundColor: colors.primary,
     borderWidth: 2,
     borderColor: colors.primary,
   },
-  comingSoonTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  comingSoonText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: colors.textSecondary,
-    letterSpacing: 2,
-    marginBottom: 12,
-  },
-  leaderboardItem: {
+  menuItemLeft: {
     flexDirection: 'row',
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.secondary,
+    flex: 1,
   },
-  rankContainer: {
-    width: 40,
-    alignItems: 'center',
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.background,
     justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 12,
   },
-  rankNumber: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.textSecondary,
+  iconContainerHighlighted: {
+    backgroundColor: `${colors.primary}30`,
   },
-  playerInfo: {
+  menuItemText: {
     flex: 1,
   },
-  playerNameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
-  },
-  playerName: {
+  menuItemTitle: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
+    marginBottom: 2,
   },
-  veteranBadge: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: colors.background,
+  menuItemTitleHighlighted: {
+    color: '#fff',
+  },
+  menuItemSubtitle: {
+    fontSize: 13,
+    color: colors.textSecondary,
+  },
+  menuItemSubtitleHighlighted: {
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
+  logoutButton: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  playerStats: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  playerStatText: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    fontWeight: '600',
-  },
-  featureCard: {
-    flexDirection: 'row',
-    backgroundColor: colors.card,
-    borderRadius: 12,
     padding: 16,
-    marginBottom: 12,
-    alignItems: 'flex-start',
-    gap: 12,
-    borderWidth: 1,
-    borderColor: colors.secondary,
+    marginTop: 20,
   },
-  featureContent: {
-    flex: 1,
-  },
-  featureTitle: {
+  logoutText: {
     fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  featureText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    lineHeight: 20,
+    fontWeight: '600',
+    color: '#ff4444',
+    marginLeft: 8,
   },
 });
