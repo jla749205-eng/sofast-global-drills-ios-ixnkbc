@@ -1,8 +1,7 @@
-
 {
   "expo": {
     "name": "SOFAST Global Drills",
-    "slug": "sofast-global-drills",
+    "slug": "SOFAST Global Drills",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/7cadd481-5bea-470d-802a-1f44d5a96178.jpeg",
@@ -80,5 +79,6 @@
       "websiteUrl": "https://tmsofast.com",
       "supportUrl": "https://tmsofast.com/support"
     }
-  }
+  },
+  "scheme": "SOFAST Global Drills"
 }
