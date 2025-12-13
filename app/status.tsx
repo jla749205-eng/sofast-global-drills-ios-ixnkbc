@@ -1,15 +1,42 @@
 
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
+import * as MailComposer from 'expo-mail-composer';
 import { colors } from '../styles/commonStyles';
 import { IconSymbol } from '../components/IconSymbol';
 
 export default function StatusScreen() {
   const router = useRouter();
 
-  const openEmail = () => {
-    Linking.openURL('mailto:support@natively.app?subject=Status%20Check%20-%20SOFAST%20Global&body=Hi%2C%0A%0ACan%20you%20tell%20me%20the%20current%20status%20of%20my%20SOFAST%20Global%20app%3F%0A%0AThanks%21');
+  const openEmail = async () => {
+    try {
+      const isAvailable = await MailComposer.isAvailableAsync();
+      
+      if (!isAvailable) {
+        Alert.alert(
+          'Email Not Available',
+          'Please email support@natively.app directly.\n\nSubject: Status Check - SOFAST Global\n\nMake sure you have an email account set up on your device.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
+      const emailBody = `Hi,
+
+Can you tell me the current status of my SOFAST Global app?
+
+Thanks!`;
+
+      await MailComposer.composeAsync({
+        recipients: ['support@natively.app'],
+        subject: 'Status Check - SOFAST Global',
+        body: emailBody,
+      });
+    } catch (error) {
+      console.log('Error opening email composer:', error);
+      Alert.alert('Error', 'Please email support@natively.app directly.');
+    }
   };
 
   return (

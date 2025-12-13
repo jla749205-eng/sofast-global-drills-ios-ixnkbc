@@ -2,23 +2,72 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Alert } from 'react-native';
 import { Stack } from 'expo-router';
+import * as MailComposer from 'expo-mail-composer';
 import { colors } from '../styles/commonStyles';
 import { IconSymbol } from '../components/IconSymbol';
 
 export default function LaunchGuideScreen() {
   const openEmail = async () => {
-    const email = 'mailto:support@natively.app?subject=Ready%20to%20Launch%20SOFAST%20Global&body=Hi%20Natively%20Team%2C%0A%0AI%27m%20ready%20to%20get%20my%20SOFAST%20Global%20app%20into%20the%20App%20Store.%0A%0A%E2%9C%85%20I%20have%20an%20Apple%20Developer%20account%0A%0AMy%20Apple%20ID%20email%3A%20%5BENTER%20YOUR%20APPLE%20ID%20EMAIL%5D%0A%0A%E2%9C%85%20I%20have%20created%203%20simple%20web%20pages%3A%0A%0APrivacy%20Policy%20URL%3A%20%5BENTER%20URL%5D%0ASupport%20Page%20URL%3A%20%5BENTER%20URL%5D%0AMarketing%20Page%20URL%3A%20%5BENTER%20URL%5D%0A%0APlease%20build%20my%20app%20and%20help%20me%20submit%20it%20to%20the%20App%20Store!%0A%0AThanks%21';
-    
     try {
-      const supported = await Linking.canOpenURL(email);
-      if (supported) {
-        await Linking.openURL(email);
-      } else {
-        Alert.alert('Email Not Available', 'Please email support@natively.app manually with your information.');
+      // Check if mail composer is available
+      const isAvailable = await MailComposer.isAvailableAsync();
+      
+      if (!isAvailable) {
+        // Fallback to mailto: link if mail composer is not available
+        const email = 'mailto:support@natively.app?subject=Ready%20to%20Launch%20SOFAST%20Global&body=Hi%20Natively%20Team%2C%0A%0AI%27m%20ready%20to%20get%20my%20SOFAST%20Global%20app%20into%20the%20App%20Store.%0A%0A%E2%9C%85%20I%20have%20an%20Apple%20Developer%20account%0A%0AMy%20Apple%20ID%20email%3A%20%5BENTER%20YOUR%20APPLE%20ID%20EMAIL%5D%0A%0A%E2%9C%85%20I%20have%20created%203%20simple%20web%20pages%3A%0A%0APrivacy%20Policy%20URL%3A%20%5BENTER%20URL%5D%0ASupport%20Page%20URL%3A%20%5BENTER%20URL%5D%0AMarketing%20Page%20URL%3A%20%5BENTER%20URL%5D%0A%0APlease%20build%20my%20app%20and%20help%20me%20submit%20it%20to%20the%20App%20Store!%0A%0AThanks%21';
+        
+        const supported = await Linking.canOpenURL(email);
+        if (supported) {
+          await Linking.openURL(email);
+        } else {
+          Alert.alert(
+            'Email Not Available',
+            'Please email support@natively.app manually with your information.\n\nEmail: support@natively.app\nSubject: Ready to Launch SOFAST Global',
+            [{ text: 'OK' }]
+          );
+        }
+        return;
+      }
+
+      // Use native mail composer
+      const emailBody = `Hi Natively Team,
+
+I'm ready to get my SOFAST Global app into the App Store.
+
+✅ I have an Apple Developer account
+
+My Apple ID email: [ENTER YOUR APPLE ID EMAIL]
+
+✅ I have created 3 simple web pages:
+
+Privacy Policy URL: [ENTER URL]
+Support Page URL: [ENTER URL]
+Marketing Page URL: [ENTER URL]
+
+Please build my app and help me submit it to the App Store!
+
+Thanks!`;
+
+      const result = await MailComposer.composeAsync({
+        recipients: ['support@natively.app'],
+        subject: 'Ready to Launch SOFAST Global',
+        body: emailBody,
+      });
+
+      console.log('Email composer result:', result);
+      
+      if (result.status === 'sent') {
+        Alert.alert('Success!', 'Your email has been sent. We\'ll get back to you soon!');
+      } else if (result.status === 'cancelled') {
+        console.log('User cancelled email');
       }
     } catch (error) {
-      console.log('Error opening email:', error);
-      Alert.alert('Error', 'Please email support@natively.app manually.');
+      console.log('Error opening email composer:', error);
+      Alert.alert(
+        'Unable to Open Email',
+        'Please email us directly at support@natively.app\n\nSubject: Ready to Launch SOFAST Global\n\nMake sure you have an email account set up on your device.',
+        [{ text: 'OK' }]
+      );
     }
   };
 
@@ -33,6 +82,33 @@ export default function LaunchGuideScreen() {
       }
     } catch (error) {
       console.log('Error opening Google Sites:', error);
+    }
+  };
+
+  const openConfusedEmail = async () => {
+    try {
+      const isAvailable = await MailComposer.isAvailableAsync();
+      
+      if (!isAvailable) {
+        const email = 'mailto:support@natively.app?subject=I%27m%20Confused%20About%20App%20Store&body=Hi%2C%0A%0AI%27m%20trying%20to%20get%20my%20SOFAST%20Global%20app%20in%20the%20App%20Store%20but%20I%27m%20confused.%20Can%20you%20help%20me%3F%0A%0AThanks%21';
+        await Linking.openURL(email);
+        return;
+      }
+
+      const emailBody = `Hi,
+
+I'm trying to get my SOFAST Global app in the App Store but I'm confused. Can you help me?
+
+Thanks!`;
+
+      await MailComposer.composeAsync({
+        recipients: ['support@natively.app'],
+        subject: 'I\'m Confused About App Store',
+        body: emailBody,
+      });
+    } catch (error) {
+      console.log('Error opening email composer:', error);
+      Alert.alert('Error', 'Please email support@natively.app directly.');
     }
   };
 
@@ -229,9 +305,7 @@ export default function LaunchGuideScreen() {
           </Text>
           <TouchableOpacity 
             style={styles.confusedButton}
-            onPress={() => {
-              Linking.openURL('mailto:support@natively.app?subject=I%27m%20Confused%20About%20App%20Store&body=Hi%2C%0A%0AI%27m%20trying%20to%20get%20my%20SOFAST%20Global%20app%20in%20the%20App%20Store%20but%20I%27m%20confused.%20Can%20you%20help%20me%3F%0A%0AThanks%21');
-            }}
+            onPress={openConfusedEmail}
           >
             <Text style={styles.confusedButtonText}>Email: &quot;I Need Help&quot;</Text>
           </TouchableOpacity>
