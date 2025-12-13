@@ -19,12 +19,30 @@ export default function ProfileScreen() {
 
   const menuItems = [
     {
+      title: '🔑 My Credentials',
+      subtitle: 'View & send your App Store credentials',
+      icon: 'key.fill',
+      androidIcon: 'vpn_key',
+      action: () => router.push('/credentials'),
+      highlighted: true,
+      color: '#FF3B30'
+    },
+    {
       title: '🚀 Launch Guide',
       subtitle: 'Simple steps to get your app on the App Store',
       icon: 'rocket.fill',
       androidIcon: 'rocket_launch',
       action: () => router.push('/launch-guide'),
-      highlighted: true
+      highlighted: true,
+      color: colors.primary
+    },
+    {
+      title: '📍 Where Am I?',
+      subtitle: 'Check your app submission status',
+      icon: 'map.fill',
+      androidIcon: 'map',
+      action: () => router.push('/status'),
+      highlighted: false
     },
     {
       title: 'Subscription',
@@ -45,7 +63,7 @@ export default function ProfileScreen() {
       subtitle: 'Get help or contact us',
       icon: 'questionmark.circle',
       androidIcon: 'help',
-      action: () => Alert.alert('Support', 'Email: support@sofast.com')
+      action: () => Alert.alert('Support', 'Email: support@natively.app')
     }
   ];
 
@@ -77,11 +95,19 @@ export default function ProfileScreen() {
           {menuItems.map((item, index) => (
             <TouchableOpacity 
               key={index}
-              style={[styles.menuItem, item.highlighted && styles.menuItemHighlighted]}
+              style={[
+                styles.menuItem, 
+                item.highlighted && styles.menuItemHighlighted,
+                item.color === '#FF3B30' && styles.menuItemUrgent
+              ]}
               onPress={item.action}
             >
               <View style={styles.menuItemLeft}>
-                <View style={[styles.iconContainer, item.highlighted && styles.iconContainerHighlighted]}>
+                <View style={[
+                  styles.iconContainer, 
+                  item.highlighted && styles.iconContainerHighlighted,
+                  item.color === '#FF3B30' && styles.iconContainerUrgent
+                ]}>
                   <IconSymbol 
                     ios_icon_name={item.icon} 
                     android_material_icon_name={item.androidIcon}
@@ -90,10 +116,16 @@ export default function ProfileScreen() {
                   />
                 </View>
                 <View style={styles.menuItemText}>
-                  <Text style={[styles.menuItemTitle, item.highlighted && styles.menuItemTitleHighlighted]}>
+                  <Text style={[
+                    styles.menuItemTitle, 
+                    item.highlighted && styles.menuItemTitleHighlighted
+                  ]}>
                     {item.title}
                   </Text>
-                  <Text style={[styles.menuItemSubtitle, item.highlighted && styles.menuItemSubtitleHighlighted]}>
+                  <Text style={[
+                    styles.menuItemSubtitle, 
+                    item.highlighted && styles.menuItemSubtitleHighlighted
+                  ]}>
                     {item.subtitle}
                   </Text>
                 </View>
@@ -102,7 +134,7 @@ export default function ProfileScreen() {
                 ios_icon_name="chevron.right" 
                 android_material_icon_name="chevron_right"
                 size={20}
-                color={item.highlighted ? colors.primary : colors.textSecondary}
+                color={item.highlighted ? '#fff' : colors.textSecondary}
               />
             </TouchableOpacity>
           ))}
@@ -168,6 +200,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.primary,
   },
+  menuItemUrgent: {
+    backgroundColor: '#FF3B30',
+    borderWidth: 3,
+    borderColor: '#FF3B30',
+  },
   menuItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -185,6 +222,9 @@ const styles = StyleSheet.create({
   iconContainerHighlighted: {
     backgroundColor: `${colors.primary}30`,
   },
+  iconContainerUrgent: {
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  },
   menuItemText: {
     flex: 1,
   },
@@ -196,6 +236,7 @@ const styles = StyleSheet.create({
   },
   menuItemTitleHighlighted: {
     color: '#fff',
+    fontWeight: '700',
   },
   menuItemSubtitle: {
     fontSize: 13,
