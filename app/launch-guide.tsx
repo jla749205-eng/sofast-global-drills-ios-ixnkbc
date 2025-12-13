@@ -1,36 +1,15 @@
 
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Alert, Modal } from 'react-native';
 import { Stack } from 'expo-router';
 import * as MailComposer from 'expo-mail-composer';
 import { colors } from '../styles/commonStyles';
 import { IconSymbol } from '../components/IconSymbol';
 
 export default function LaunchGuideScreen() {
-  const openEmail = async () => {
-    try {
-      // Check if mail composer is available
-      const isAvailable = await MailComposer.isAvailableAsync();
-      
-      if (!isAvailable) {
-        // Fallback to mailto: link if mail composer is not available
-        const email = 'mailto:support@natively.app?subject=Ready%20to%20Launch%20SOFAST%20Global&body=Hi%20Natively%20Team%2C%0A%0AI%27m%20ready%20to%20get%20my%20SOFAST%20Global%20app%20into%20the%20App%20Store.%0A%0A%E2%9C%85%20I%20have%20an%20Apple%20Developer%20account%0A%0AMy%20Apple%20ID%20email%3A%20%5BENTER%20YOUR%20APPLE%20ID%20EMAIL%5D%0A%0A%E2%9C%85%20I%20have%20created%203%20simple%20web%20pages%3A%0A%0APrivacy%20Policy%20URL%3A%20%5BENTER%20URL%5D%0ASupport%20Page%20URL%3A%20%5BENTER%20URL%5D%0AMarketing%20Page%20URL%3A%20%5BENTER%20URL%5D%0A%0APlease%20build%20my%20app%20and%20help%20me%20submit%20it%20to%20the%20App%20Store!%0A%0AThanks%21';
-        
-        const supported = await Linking.canOpenURL(email);
-        if (supported) {
-          await Linking.openURL(email);
-        } else {
-          Alert.alert(
-            'Email Not Available',
-            'Please email support@natively.app manually with your information.\n\nEmail: support@natively.app\nSubject: Ready to Launch SOFAST Global',
-            [{ text: 'OK' }]
-          );
-        }
-        return;
-      }
+  const [showEmailInfo, setShowEmailInfo] = useState(false);
 
-      // Use native mail composer
-      const emailBody = `Hi Natively Team,
+  const emailTemplate = `Hi Natively Team,
 
 I'm ready to get my SOFAST Global app into the App Store.
 
@@ -48,25 +27,68 @@ Please build my app and help me submit it to the App Store!
 
 Thanks!`;
 
+  const openEmail = async () => {
+    try {
+      console.log('Checking if mail composer is available...');
+      
+      // Check if mail composer is available
+      const isAvailable = await MailComposer.isAvailableAsync();
+      console.log('Mail composer available:', isAvailable);
+      
+      if (!isAvailable) {
+        console.log('Mail composer not available, showing manual email option');
+        Alert.alert(
+          'Email Setup Required',
+          'Your device needs an email account configured to send emails.\n\nWould you like to see the email information so you can send it manually?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { 
+              text: 'Show Email Info', 
+              onPress: () => setShowEmailInfo(true)
+            }
+          ]
+        );
+        return;
+      }
+
+      console.log('Opening mail composer...');
+      
+      // Use native mail composer
       const result = await MailComposer.composeAsync({
         recipients: ['support@natively.app'],
         subject: 'Ready to Launch SOFAST Global',
-        body: emailBody,
+        body: emailTemplate,
       });
 
       console.log('Email composer result:', result);
       
       if (result.status === 'sent') {
-        Alert.alert('Success!', 'Your email has been sent. We\'ll get back to you soon!');
+        Alert.alert(
+          'Success! 🎉', 
+          'Your email has been sent. We\'ll get back to you within 24 hours!',
+          [{ text: 'OK' }]
+        );
       } else if (result.status === 'cancelled') {
         console.log('User cancelled email');
+      } else if (result.status === 'saved') {
+        Alert.alert(
+          'Email Saved',
+          'Your email has been saved as a draft. Don\'t forget to send it!',
+          [{ text: 'OK' }]
+        );
       }
     } catch (error) {
-      console.log('Error opening email composer:', error);
+      console.error('Error opening email composer:', error);
       Alert.alert(
         'Unable to Open Email',
-        'Please email us directly at support@natively.app\n\nSubject: Ready to Launch SOFAST Global\n\nMake sure you have an email account set up on your device.',
-        [{ text: 'OK' }]
+        'There was a problem opening your email app.\n\nWould you like to see the email information so you can send it manually?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Show Email Info', 
+            onPress: () => setShowEmailInfo(true)
+          }
+        ]
       );
     }
   };
@@ -90,8 +112,11 @@ Thanks!`;
       const isAvailable = await MailComposer.isAvailableAsync();
       
       if (!isAvailable) {
-        const email = 'mailto:support@natively.app?subject=I%27m%20Confused%20About%20App%20Store&body=Hi%2C%0A%0AI%27m%20trying%20to%20get%20my%20SOFAST%20Global%20app%20in%20the%20App%20Store%20but%20I%27m%20confused.%20Can%20you%20help%20me%3F%0A%0AThanks%21';
-        await Linking.openURL(email);
+        Alert.alert(
+          'Email Setup Required',
+          'Please send an email to:\n\nsupport@natively.app\n\nSubject: I\'m Confused About App Store\n\nMessage: Hi, I\'m trying to get my SOFAST Global app in the App Store but I\'m confused. Can you help me?',
+          [{ text: 'OK' }]
+        );
         return;
       }
 
@@ -108,8 +133,16 @@ Thanks!`;
       });
     } catch (error) {
       console.log('Error opening email composer:', error);
-      Alert.alert('Error', 'Please email support@natively.app directly.');
+      Alert.alert(
+        'Error',
+        'Please send an email to support@natively.app with subject "I\'m Confused About App Store"'
+      );
     }
+  };
+
+  const copyToClipboard = (text: string) => {
+    // Note: Clipboard API would require expo-clipboard package
+    Alert.alert('Copy Manually', 'Please manually copy the information shown above.');
   };
 
   return (
@@ -252,6 +285,15 @@ Thanks!`;
               color="#fff"
             />
           </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.manualEmailButton}
+            onPress={() => setShowEmailInfo(true)}
+          >
+            <Text style={styles.manualEmailButtonText}>
+              Or tap here to see email details (if button above doesn&apos;t work)
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* What Happens Next */}
@@ -320,6 +362,83 @@ Thanks!`;
 
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* Email Info Modal */}
+      <Modal
+        visible={showEmailInfo}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowEmailInfo(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Email Information</Text>
+            <TouchableOpacity onPress={() => setShowEmailInfo(false)}>
+              <IconSymbol 
+                ios_icon_name="xmark.circle.fill" 
+                android_material_icon_name="cancel"
+                size={32}
+                color={colors.text}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalContent}>
+            <View style={styles.infoSection}>
+              <Text style={styles.infoLabel}>Send Email To:</Text>
+              <View style={styles.infoBox}>
+                <Text style={styles.infoText}>support@natively.app</Text>
+              </View>
+            </View>
+
+            <View style={styles.infoSection}>
+              <Text style={styles.infoLabel}>Subject:</Text>
+              <View style={styles.infoBox}>
+                <Text style={styles.infoText}>Ready to Launch SOFAST Global</Text>
+              </View>
+            </View>
+
+            <View style={styles.infoSection}>
+              <Text style={styles.infoLabel}>Message:</Text>
+              <View style={styles.infoBox}>
+                <Text style={styles.infoText}>{emailTemplate}</Text>
+              </View>
+            </View>
+
+            <View style={styles.instructionsBox}>
+              <IconSymbol 
+                ios_icon_name="info.circle.fill" 
+                android_material_icon_name="info"
+                size={24}
+                color={colors.primary}
+              />
+              <Text style={styles.instructionsText}>
+                Copy this information and send it from your email app (Gmail, Outlook, etc.)
+              </Text>
+            </View>
+
+            <View style={styles.troubleshootingBox}>
+              <Text style={styles.troubleshootingTitle}>Troubleshooting Tips:</Text>
+              <Text style={styles.troubleshootingText}>
+                • Make sure you have an email account set up on your device{'\n'}
+                • Try opening your email app (Gmail, Mail, etc.) directly{'\n'}
+                • On iPhone, go to Settings → Mail → Accounts to add an email{'\n'}
+                • On Android, open Gmail or your email app to sign in{'\n'}
+                • If all else fails, send the email from your computer
+              </Text>
+            </View>
+          </ScrollView>
+
+          <View style={styles.modalFooter}>
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => setShowEmailInfo(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -488,6 +607,17 @@ const styles = StyleSheet.create({
     color: '#fff',
     opacity: 0.9,
   },
+  manualEmailButton: {
+    marginTop: 12,
+    padding: 12,
+    alignItems: 'center',
+  },
+  manualEmailButtonText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
+  },
   timelineCard: {
     backgroundColor: colors.surface,
     borderRadius: 20,
@@ -579,5 +709,101 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     fontWeight: '600',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    paddingTop: 60,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: colors.text,
+  },
+  modalContent: {
+    flex: 1,
+    padding: 20,
+  },
+  infoSection: {
+    marginBottom: 24,
+  },
+  infoLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.textSecondary,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  infoBox: {
+    backgroundColor: colors.surface,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  infoText: {
+    fontSize: 16,
+    color: colors.text,
+    lineHeight: 24,
+  },
+  instructionsBox: {
+    flexDirection: 'row',
+    backgroundColor: colors.primary + '20',
+    padding: 16,
+    borderRadius: 12,
+    gap: 12,
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+  instructionsText: {
+    flex: 1,
+    fontSize: 15,
+    color: colors.text,
+    lineHeight: 22,
+  },
+  troubleshootingBox: {
+    backgroundColor: colors.surface,
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: 24,
+  },
+  troubleshootingTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 12,
+  },
+  troubleshootingText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 22,
+  },
+  modalFooter: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  closeButton: {
+    backgroundColor: colors.primary,
+    padding: 18,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#fff',
   },
 });
