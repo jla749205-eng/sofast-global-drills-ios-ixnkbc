@@ -57,7 +57,7 @@ export default function HomeScreen() {
 
   const handleWebsitePress = async () => {
     try {
-      const url = 'https://teamsofast.com';
+      const url = 'https://tmsofast.com';
       const canOpen = await Linking.canOpenURL(url);
       if (canOpen) {
         await Linking.openURL(url);
@@ -173,7 +173,7 @@ export default function HomeScreen() {
           />
           <Text style={styles.logo}>Team SOFAST</Text>
           <TouchableOpacity onPress={handleWebsitePress} activeOpacity={0.7}>
-            <Text style={styles.websiteLink}>Teamsofast.com</Text>
+            <Text style={styles.websiteLink}>tmsofast.com</Text>
           </TouchableOpacity>
           <Text style={styles.subtitle}>Marksmanship Competition Platform</Text>
           {isPremium && (
