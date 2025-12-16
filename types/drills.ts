@@ -19,7 +19,7 @@ export interface DrillResult {
   hits: number;
   misses: number;
   score: number;
-  division: 'Open' | 'Vet' | 'LE';
+  division: 'SSP' | 'ESP' | 'CCP' | 'CDP' | 'REV' | 'BUG' | 'PCC';
   flinchDetected: boolean;
   targetAnalysis?: {
     totalPoints: number;
@@ -39,7 +39,7 @@ export interface LeaderboardEntry {
   drillId: string;
   score: number;
   totalTime: number;
-  division: 'Open' | 'Vet' | 'LE';
+  division: 'SSP' | 'ESP' | 'CCP' | 'CDP' | 'REV' | 'BUG' | 'PCC';
   timestamp: number;
   isVeteran: boolean;
 }

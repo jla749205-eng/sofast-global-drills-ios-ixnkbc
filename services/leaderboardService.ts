@@ -10,7 +10,7 @@
 
 import { DrillResult, LeaderboardEntry } from '@/types/drills';
 
-export type Division = 'Open' | 'Vet' | 'LE';
+export type Division = 'SSP' | 'ESP' | 'CCP' | 'CDP' | 'REV' | 'BUG' | 'PCC';
 
 interface GlobalRankingEntry {
   rank: number;
@@ -177,7 +177,7 @@ export class LeaderboardService {
 
   private initializeMockData() {
     // Initialize mock rankings for all divisions
-    const divisions: Division[] = ['Open', 'Vet', 'LE'];
+    const divisions: Division[] = ['SSP', 'ESP', 'CCP', 'CDP', 'REV', 'BUG', 'PCC'];
     divisions.forEach(division => {
       const mockRankings = this.generateMockRankings(division, 100);
       this.cachedRankings.set(division, mockRankings);
@@ -202,7 +202,7 @@ export class LeaderboardService {
         totalTime: 8.0 + (i * 0.5) + (Math.random() * 0.5),
         division,
         timestamp: Date.now() - (i * 86400000),
-        isVeteran: division === 'Vet',
+        isVeteran: false,
       });
     }
 

@@ -18,9 +18,19 @@ interface RankingEntry {
   isCurrentUser?: boolean;
 }
 
+const DIVISION_INFO: Record<Division, { name: string; description: string }> = {
+  SSP: { name: 'Stock Service Pistol', description: 'Factory stock pistols' },
+  ESP: { name: 'Enhanced Service Pistol', description: 'Modified service pistols' },
+  CCP: { name: 'Carry Concealed Pistol', description: 'Compact carry pistols' },
+  CDP: { name: 'Custom Defensive Pistol', description: '.45 ACP custom pistols' },
+  REV: { name: 'Revolver', description: 'Revolvers only' },
+  BUG: { name: 'Back-Up Gun', description: 'Pocket-sized pistols' },
+  PCC: { name: 'Pistol Caliber Carbine', description: 'Pistol caliber carbines' },
+};
+
 export default function RankingsScreen() {
   const router = useRouter();
-  const [selectedDivision, setSelectedDivision] = useState<Division>('Open');
+  const [selectedDivision, setSelectedDivision] = useState<Division>('SSP');
   const [rankings, setRankings] = useState<RankingEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userRanking, setUserRanking] = useState<RankingEntry | null>(null);
@@ -144,8 +154,12 @@ export default function RankingsScreen() {
       </View>
 
       {/* Division Selector */}
-      <View style={styles.divisionSelector}>
-        {(['Open', 'Vet', 'LE'] as Division[]).map((division) => (
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.divisionSelector}
+      >
+        {(['SSP', 'ESP', 'CCP', 'CDP', 'REV', 'BUG', 'PCC'] as Division[]).map((division) => (
           <TouchableOpacity
             key={division}
             style={[
@@ -158,10 +172,23 @@ export default function RankingsScreen() {
               styles.divisionButtonText,
               selectedDivision === division && styles.divisionButtonTextActive
             ]}>
-              {division === 'LE' ? 'Law Enforcement' : division}
+              {division}
+            </Text>
+            <Text style={[
+              styles.divisionButtonSubtext,
+              selectedDivision === division && styles.divisionButtonSubtextActive
+            ]}>
+              {DIVISION_INFO[division].name}
             </Text>
           </TouchableOpacity>
         ))}
+      </ScrollView>
+
+      {/* Division Description */}
+      <View style={styles.divisionDescriptionContainer}>
+        <Text style={styles.divisionDescription}>
+          {DIVISION_INFO[selectedDivision].description}
+        </Text>
       </View>
 
       {/* Classification Legend */}
@@ -247,6 +274,18 @@ export default function RankingsScreen() {
                   Complete drills with verified target photos to improve your classification and climb the leaderboard!
                 </Text>
                 <Text style={styles.infoText}>
+                  IDPA Divisions follow the official rule book:
+                </Text>
+                <Text style={styles.infoText}>
+                  • SSP: Stock Service Pistol{'\n'}
+                  • ESP: Enhanced Service Pistol{'\n'}
+                  • CCP: Carry Concealed Pistol{'\n'}
+                  • CDP: Custom Defensive Pistol (.45 ACP){'\n'}
+                  • REV: Revolver{'\n'}
+                  • BUG: Back-Up Gun{'\n'}
+                  • PCC: Pistol Caliber Carbine
+                </Text>
+                <Text style={styles.infoText}>
                   Classifications follow USPSA standards:
                 </Text>
                 <Text style={styles.infoText}>
@@ -296,30 +335,52 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   divisionSelector: {
-    flexDirection: 'row',
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     gap: 8,
   },
   divisionButton: {
-    flex: 1,
     paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 8,
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.secondary,
     alignItems: 'center',
+    minWidth: 100,
   },
   divisionButtonActive: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
   },
   divisionButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.textSecondary,
+    fontSize: 16,
+    fontWeight: '800',
+    color: colors.text,
   },
   divisionButtonTextActive: {
     color: colors.background,
+  },
+  divisionButtonSubtext: {
+    fontSize: 9,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  divisionButtonSubtextActive: {
+    color: colors.background,
+    opacity: 0.8,
+  },
+  divisionDescriptionContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  divisionDescription: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   legendContainer: {
     paddingHorizontal: 16,
