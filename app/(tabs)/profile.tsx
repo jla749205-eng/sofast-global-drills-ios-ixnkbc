@@ -1,12 +1,14 @@
 
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, TextInput } from 'react-native';
 import { colors } from '../../styles/commonStyles';
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '../../components/IconSymbol';
 
 export default function Profile() {
   const router = useRouter();
+  const [username, setUsername] = useState('');
+  const [pistolClass, setPistolClass] = useState('');
 
   const menuItems = [
     {
@@ -26,6 +28,61 @@ export default function Profile() {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>User Profile</Text>
+          
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Username</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your username"
+              placeholderTextColor={colors.secondaryText}
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Pistol Class/Type</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g., Glock 19, 1911, Sig P320"
+              placeholderTextColor={colors.secondaryText}
+              value={pistolClass}
+              onChangeText={setPistolClass}
+              autoCapitalize="words"
+            />
+          </View>
+
+          {(username || pistolClass) && (
+            <View style={styles.profileSummary}>
+              {username && (
+                <View style={styles.summaryRow}>
+                  <IconSymbol 
+                    ios_icon_name="person.fill" 
+                    android_material_icon_name="person" 
+                    size={20} 
+                    color={colors.primary} 
+                  />
+                  <Text style={styles.summaryText}>{username}</Text>
+                </View>
+              )}
+              {pistolClass && (
+                <View style={styles.summaryRow}>
+                  <IconSymbol 
+                    ios_icon_name="target" 
+                    android_material_icon_name="gps_fixed" 
+                    size={20} 
+                    color={colors.primary} 
+                  />
+                  <Text style={styles.summaryText}>{pistolClass}</Text>
+                </View>
+              )}
+            </View>
+          )}
+        </View>
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Access</Text>
           {menuItems.map((item, index) => (
@@ -125,6 +182,43 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text,
     marginBottom: 15,
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: colors.cardBackground,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 12,
+    padding: 15,
+    fontSize: 16,
+    color: colors.text,
+  },
+  profileSummary: {
+    backgroundColor: colors.cardBackground,
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    marginTop: 10,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  summaryText: {
+    fontSize: 16,
+    color: colors.text,
+    marginLeft: 10,
+    fontWeight: '600',
   },
   menuItem: {
     flexDirection: 'row',

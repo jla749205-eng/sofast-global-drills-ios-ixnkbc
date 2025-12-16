@@ -1,12 +1,16 @@
 
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '../styles/commonStyles';
 import { IconSymbol } from '../components/IconSymbol';
 
 export default function HelpGuide() {
   const router = useRouter();
+
+  const handleWebsitePress = () => {
+    Linking.openURL('https://tmsofast.com');
+  };
 
   return (
     <View style={styles.container}>
@@ -79,12 +83,31 @@ export default function HelpGuide() {
         </View>
 
         <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🌐 Support Website</Text>
+          <TouchableOpacity onPress={handleWebsitePress} style={styles.websiteButton}>
+            <IconSymbol 
+              ios_icon_name="globe" 
+              android_material_icon_name="language" 
+              size={24} 
+              color={colors.primary} 
+            />
+            <Text style={styles.websiteText}>tmsofast.com</Text>
+            <IconSymbol 
+              ios_icon_name="arrow.up.right" 
+              android_material_icon_name="open_in_new" 
+              size={20} 
+              color={colors.primary} 
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
           <Text style={styles.sectionTitle}>❓ Need More Help?</Text>
           <Text style={styles.text}>
             - Check the "Submission Guide" button in your Profile
           </Text>
           <Text style={styles.text}>
-            - All your credentials are in the "Credentials" button
+            - Visit tmsofast.com for more information
           </Text>
           <Text style={styles.text}>
             - Everything is working - you just need to create those two web pages and join Apple Developer Program
@@ -176,6 +199,22 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginLeft: 10,
     marginBottom: 5,
+  },
+  websiteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background,
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  websiteText: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.primary,
+    marginLeft: 12,
   },
   finalNote: {
     backgroundColor: colors.primary,
