@@ -307,6 +307,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: colors.primary,
     letterSpacing: 2,
+    textAlign: 'center',
     textShadowColor: colors.highlight,
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 8,
@@ -316,6 +317,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.primary,
     marginTop: 8,
+    textAlign: 'center',
     textDecorationLine: 'underline',
   },
   subtitle: {

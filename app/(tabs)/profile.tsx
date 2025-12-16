@@ -10,16 +10,8 @@ export default function Profile() {
 
   const menuItems = [
     {
-      title: '❓ Help Guide - START HERE',
-      description: 'Learn how to use Natively and submit your app',
-      icon: 'questionmark.circle.fill',
-      androidIcon: 'help',
-      route: '/help-guide',
-      highlight: true,
-    },
-    {
       title: 'Submission Guide',
-      description: 'Step-by-step guide for App Store submission',
+      description: 'View privacy policy and support information',
       icon: 'arrow.up.circle.fill',
       androidIcon: 'upload',
       route: '/submission-guide',
@@ -41,19 +33,12 @@ export default function Profile() {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <View style={styles.bigNotice}>
-          <Text style={styles.bigNoticeTitle}>👋 CONFUSED? START HERE! 👋</Text>
-          <Text style={styles.bigNoticeText}>
-            Tap the "Help Guide" button below to understand how this works and what to do next.
-          </Text>
-        </View>
-
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Access</Text>
           {menuItems.map((item, index) => (
             <TouchableOpacity
               key={index}
-              style={[styles.menuItem, item.highlight && styles.menuItemHighlight]}
+              style={styles.menuItem}
               onPress={() => router.push(item.route as any)}
             >
               <View style={styles.menuItemIcon}>
@@ -61,14 +46,14 @@ export default function Profile() {
                   ios_icon_name={item.icon} 
                   android_material_icon_name={item.androidIcon} 
                   size={28} 
-                  color={item.highlight ? '#000' : colors.primary} 
+                  color={colors.primary} 
                 />
               </View>
               <View style={styles.menuItemContent}>
-                <Text style={[styles.menuItemTitle, item.highlight && styles.menuItemTitleHighlight]}>
+                <Text style={styles.menuItemTitle}>
                   {item.title}
                 </Text>
-                <Text style={[styles.menuItemDescription, item.highlight && styles.menuItemDescriptionHighlight]}>
+                <Text style={styles.menuItemDescription}>
                   {item.description}
                 </Text>
               </View>
@@ -76,7 +61,7 @@ export default function Profile() {
                 ios_icon_name="chevron.right" 
                 android_material_icon_name="chevron_right" 
                 size={20} 
-                color={item.highlight ? '#000' : colors.text} 
+                color={colors.text} 
               />
             </TouchableOpacity>
           ))}
@@ -101,13 +86,7 @@ export default function Profile() {
         <View style={styles.statusCard}>
           <Text style={styles.statusTitle}>✅ Your App is Complete!</Text>
           <Text style={styles.statusText}>
-            All features are working. You just need to:
-          </Text>
-          <Text style={styles.statusBullet}>1. Create Privacy Policy & Support pages</Text>
-          <Text style={styles.statusBullet}>2. Join Apple Developer Program ($99/year)</Text>
-          <Text style={styles.statusBullet}>3. Submit to App Store</Text>
-          <Text style={styles.statusFooter}>
-            Tap "Help Guide" above for detailed instructions!
+            All features are working and ready for the App Store.
           </Text>
         </View>
       </ScrollView>
@@ -145,27 +124,6 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 100,
   },
-  bigNotice: {
-    backgroundColor: colors.primary,
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 20,
-    borderWidth: 3,
-    borderColor: '#FFD700',
-  },
-  bigNoticeTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  bigNoticeText: {
-    fontSize: 16,
-    color: '#000',
-    textAlign: 'center',
-    lineHeight: 22,
-  },
   section: {
     marginBottom: 25,
   },
@@ -185,11 +143,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  menuItemHighlight: {
-    backgroundColor: colors.primary,
-    borderColor: '#FFD700',
-    borderWidth: 2,
-  },
   menuItemIcon: {
     marginRight: 15,
   },
@@ -202,18 +155,9 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: 4,
   },
-  menuItemTitleHighlight: {
-    color: '#000',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
   menuItemDescription: {
     fontSize: 13,
     color: colors.secondaryText,
-  },
-  menuItemDescriptionHighlight: {
-    color: '#000',
-    fontSize: 14,
   },
   infoRow: {
     flexDirection: 'row',
@@ -247,19 +191,5 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 15,
     color: colors.text,
-    marginBottom: 10,
-  },
-  statusBullet: {
-    fontSize: 15,
-    color: colors.text,
-    marginLeft: 10,
-    marginBottom: 5,
-  },
-  statusFooter: {
-    fontSize: 14,
-    color: colors.primary,
-    fontWeight: '600',
-    marginTop: 10,
-    textAlign: 'center',
   },
 });
