@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Alert, Image, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '@/styles/commonStyles';
 import { DRILLS } from '@/data/drills';
@@ -53,6 +53,21 @@ export default function HomeScreen() {
         }
       ]
     );
+  };
+
+  const handleWebsitePress = async () => {
+    try {
+      const url = 'https://teamsofast.com';
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert('Error', 'Unable to open website');
+      }
+    } catch (error) {
+      console.error('Error opening website:', error);
+      Alert.alert('Error', 'Failed to open website');
+    }
   };
 
   const freeDrills = DRILLS.filter(d => !d.isPremium);
@@ -156,7 +171,10 @@ export default function HomeScreen() {
             style={styles.logoImage}
             resizeMode="contain"
           />
-          <Text style={styles.logo}>SOFAST Global</Text>
+          <Text style={styles.logo}>Team SOFAST</Text>
+          <TouchableOpacity onPress={handleWebsitePress} activeOpacity={0.7}>
+            <Text style={styles.websiteLink}>Teamsofast.com</Text>
+          </TouchableOpacity>
           <Text style={styles.subtitle}>Marksmanship Competition Platform</Text>
           {isPremium && (
             <View style={styles.premiumBadgeLarge}>
@@ -170,58 +188,6 @@ export default function HomeScreen() {
             </View>
           )}
         </View>
-
-        {/* WHERE AM I BUTTON */}
-        <TouchableOpacity
-          style={styles.statusButton}
-          onPress={() => router.push('/status')}
-          activeOpacity={0.8}
-        >
-          <View style={styles.statusButtonContent}>
-            <IconSymbol
-              ios_icon_name="map.fill"
-              android_material_icon_name="map"
-              size={36}
-              color="#fff"
-            />
-            <View style={styles.statusButtonTextContainer}>
-              <Text style={styles.statusButtonTitle}>WHERE AM I IN THE PROCESS?</Text>
-              <Text style={styles.statusButtonSubtitle}>Tap to see your current status</Text>
-            </View>
-            <IconSymbol
-              ios_icon_name="chevron.right"
-              android_material_icon_name="chevron_right"
-              size={32}
-              color="#fff"
-            />
-          </View>
-        </TouchableOpacity>
-
-        {/* APP STORE BUTTON */}
-        <TouchableOpacity
-          style={styles.appStoreButton}
-          onPress={() => router.push('/launch-guide')}
-          activeOpacity={0.8}
-        >
-          <View style={styles.appStoreButtonContent}>
-            <IconSymbol
-              ios_icon_name="rocket.fill"
-              android_material_icon_name="rocket_launch"
-              size={40}
-              color="#fff"
-            />
-            <View style={styles.appStoreButtonTextContainer}>
-              <Text style={styles.appStoreButtonTitle}>GET IN THE APP STORE</Text>
-              <Text style={styles.appStoreButtonSubtitle}>Simple 3-step guide (no technical knowledge needed!)</Text>
-            </View>
-            <IconSymbol
-              ios_icon_name="chevron.right"
-              android_material_icon_name="chevron_right"
-              size={32}
-              color="#fff"
-            />
-          </View>
-        </TouchableOpacity>
 
         {/* Features Banner */}
         <View style={styles.featuresBanner}>
@@ -345,12 +311,19 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 8,
   },
+  websiteLink: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.primary,
+    marginTop: 8,
+    textDecorationLine: 'underline',
+  },
   subtitle: {
     fontSize: 12,
     fontWeight: '600',
     color: colors.textSecondary,
     letterSpacing: 2,
-    marginTop: 4,
+    marginTop: 8,
     textAlign: 'center',
   },
   premiumBadgeLarge: {
@@ -370,76 +343,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.accent,
     letterSpacing: 1,
-  },
-  statusButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 3,
-    borderColor: '#4DA3FF',
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  statusButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  statusButtonTextContainer: {
-    flex: 1,
-  },
-  statusButtonTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#fff',
-    marginBottom: 4,
-    letterSpacing: 0.5,
-  },
-  statusButtonSubtitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#fff',
-    opacity: 0.9,
-    lineHeight: 18,
-  },
-  appStoreButton: {
-    backgroundColor: '#FF3B30',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
-    borderWidth: 3,
-    borderColor: '#FF6B60',
-    shadowColor: '#FF3B30',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  appStoreButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  appStoreButtonTextContainer: {
-    flex: 1,
-  },
-  appStoreButtonTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#fff',
-    marginBottom: 4,
-    letterSpacing: 0.5,
-  },
-  appStoreButtonSubtitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#fff',
-    opacity: 0.9,
-    lineHeight: 18,
   },
   featuresBanner: {
     flexDirection: 'row',
