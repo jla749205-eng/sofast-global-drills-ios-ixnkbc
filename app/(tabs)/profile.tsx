@@ -19,29 +19,20 @@ export default function ProfileScreen() {
 
   const menuItems = [
     {
-      title: '🔑 My Credentials',
-      subtitle: 'View & send your App Store credentials',
-      icon: 'key.fill',
-      androidIcon: 'vpn_key',
-      action: () => router.push('/credentials'),
-      highlighted: true,
-      color: '#FF3B30'
-    },
-    {
-      title: '🚀 Launch Guide',
-      subtitle: 'Simple steps to get your app on the App Store',
-      icon: 'rocket.fill',
-      androidIcon: 'rocket_launch',
-      action: () => router.push('/launch-guide'),
+      title: '📱 App Store Submission Guide',
+      subtitle: 'Step-by-step guide to submit your app',
+      icon: 'app.badge.checkmark.fill',
+      androidIcon: 'verified',
+      action: () => router.push('/submission-guide'),
       highlighted: true,
       color: colors.primary
     },
     {
-      title: '📍 Where Am I?',
-      subtitle: 'Check your app submission status',
-      icon: 'map.fill',
-      androidIcon: 'map',
-      action: () => router.push('/status'),
+      title: '🔑 My Credentials',
+      subtitle: 'View your Apple Developer credentials',
+      icon: 'key.fill',
+      androidIcon: 'vpn_key',
+      action: () => router.push('/credentials'),
       highlighted: false
     },
     {
@@ -63,7 +54,7 @@ export default function ProfileScreen() {
       subtitle: 'Get help or contact us',
       icon: 'questionmark.circle',
       androidIcon: 'help',
-      action: () => Alert.alert('Support', 'Email: support@natively.app')
+      action: () => Alert.alert('Support', 'For app submission help, see the Submission Guide above.')
     }
   ];
 
@@ -88,7 +79,23 @@ export default function ProfileScreen() {
             />
           </View>
           <Text style={styles.nameText}>SOFAST User</Text>
-          <Text style={styles.emailText}>shooter@sofast.com</Text>
+          <Text style={styles.emailText}>Team SOFAST LLC</Text>
+        </View>
+
+        {/* Important Notice */}
+        <View style={styles.noticeCard}>
+          <IconSymbol 
+            ios_icon_name="info.circle.fill" 
+            android_material_icon_name="info"
+            size={32}
+            color={colors.primary}
+          />
+          <View style={styles.noticeContent}>
+            <Text style={styles.noticeTitle}>Ready to Submit?</Text>
+            <Text style={styles.noticeText}>
+              Check out the App Store Submission Guide below for step-by-step instructions on how to get your app live.
+            </Text>
+          </View>
         </View>
 
         <View style={styles.menuSection}>
@@ -97,16 +104,14 @@ export default function ProfileScreen() {
               key={index}
               style={[
                 styles.menuItem, 
-                item.highlighted && styles.menuItemHighlighted,
-                item.color === '#FF3B30' && styles.menuItemUrgent
+                item.highlighted && styles.menuItemHighlighted
               ]}
               onPress={item.action}
             >
               <View style={styles.menuItemLeft}>
                 <View style={[
                   styles.iconContainer, 
-                  item.highlighted && styles.iconContainerHighlighted,
-                  item.color === '#FF3B30' && styles.iconContainerUrgent
+                  item.highlighted && styles.iconContainerHighlighted
                 ]}>
                   <IconSymbol 
                     ios_icon_name={item.icon} 
@@ -183,6 +188,30 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.textSecondary,
   },
+  noticeCard: {
+    flexDirection: 'row',
+    backgroundColor: colors.primary + '20',
+    padding: 20,
+    borderRadius: 16,
+    gap: 16,
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+  noticeContent: {
+    flex: 1,
+  },
+  noticeTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: colors.text,
+    marginBottom: 8,
+  },
+  noticeText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 20,
+  },
   menuSection: {
     marginTop: 20,
   },
@@ -200,11 +229,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.primary,
   },
-  menuItemUrgent: {
-    backgroundColor: '#FF3B30',
-    borderWidth: 3,
-    borderColor: '#FF3B30',
-  },
   menuItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -221,9 +245,6 @@ const styles = StyleSheet.create({
   },
   iconContainerHighlighted: {
     backgroundColor: `${colors.primary}30`,
-  },
-  iconContainerUrgent: {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
   },
   menuItemText: {
     flex: 1,
