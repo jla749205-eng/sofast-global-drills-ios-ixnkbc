@@ -1,159 +1,115 @@
 
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { Stack, router } from 'expo-router';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { colors } from '../../styles/commonStyles';
+import { useRouter } from 'expo-router';
 import { IconSymbol } from '../../components/IconSymbol';
 
-export default function ProfileScreen() {
-  const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Logout', style: 'destructive', onPress: () => console.log('Logout') }
-      ]
-    );
-  };
+export default function Profile() {
+  const router = useRouter();
 
   const menuItems = [
     {
-      title: '📱 App Store Submission Guide',
-      subtitle: 'Step-by-step guide to submit your app',
-      icon: 'app.badge.checkmark.fill',
-      androidIcon: 'verified',
-      action: () => router.push('/submission-guide'),
-      highlighted: true,
-      color: colors.primary
-    },
-    {
-      title: '🔑 My Credentials',
-      subtitle: 'View your Apple Developer credentials',
-      icon: 'key.fill',
-      androidIcon: 'vpn_key',
-      action: () => router.push('/credentials'),
-      highlighted: false
-    },
-    {
-      title: 'Subscription',
-      subtitle: 'Manage your subscription',
-      icon: 'star.fill',
-      androidIcon: 'star',
-      action: () => Alert.alert('Subscription', 'Coming soon!')
-    },
-    {
-      title: 'Settings',
-      subtitle: 'App preferences',
-      icon: 'gear',
-      androidIcon: 'settings',
-      action: () => Alert.alert('Settings', 'Coming soon!')
-    },
-    {
-      title: 'Help & Support',
-      subtitle: 'Get help or contact us',
-      icon: 'questionmark.circle',
+      title: '❓ Help Guide - START HERE',
+      description: 'Learn how to use Natively and submit your app',
+      icon: 'questionmark.circle.fill',
       androidIcon: 'help',
-      action: () => Alert.alert('Support', 'For app submission help, see the Submission Guide above.')
-    }
+      route: '/help-guide',
+      highlight: true,
+    },
+    {
+      title: 'Submission Guide',
+      description: 'Step-by-step guide for App Store submission',
+      icon: 'arrow.up.circle.fill',
+      androidIcon: 'upload',
+      route: '/submission-guide',
+    },
+    {
+      title: 'Credentials',
+      description: 'View your API keys and Team IDs',
+      icon: 'key.fill',
+      androidIcon: 'key',
+      route: '/credentials',
+    },
   ];
 
   return (
     <View style={styles.container}>
-      <Stack.Screen 
-        options={{
-          title: 'Profile',
-          headerStyle: { backgroundColor: colors.background },
-          headerTintColor: colors.text,
-        }}
-      />
-      
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>SOFAST Global</Text>
+        <Text style={styles.headerSubtitle}>Professional Marksmanship Training</Text>
+      </View>
+
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <View style={styles.profileHeader}>
-          <View style={styles.avatarContainer}>
-            <IconSymbol 
-              ios_icon_name="person.circle.fill" 
-              android_material_icon_name="account_circle"
-              size={80}
-              color={colors.primary}
-            />
-          </View>
-          <Text style={styles.nameText}>SOFAST User</Text>
-          <Text style={styles.emailText}>Team SOFAST LLC</Text>
+        <View style={styles.bigNotice}>
+          <Text style={styles.bigNoticeTitle}>👋 CONFUSED? START HERE! 👋</Text>
+          <Text style={styles.bigNoticeText}>
+            Tap the "Help Guide" button below to understand how this works and what to do next.
+          </Text>
         </View>
 
-        {/* Important Notice */}
-        <View style={styles.noticeCard}>
-          <IconSymbol 
-            ios_icon_name="info.circle.fill" 
-            android_material_icon_name="info"
-            size={32}
-            color={colors.primary}
-          />
-          <View style={styles.noticeContent}>
-            <Text style={styles.noticeTitle}>Ready to Submit?</Text>
-            <Text style={styles.noticeText}>
-              Check out the App Store Submission Guide below for step-by-step instructions on how to get your app live.
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.menuSection}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Quick Access</Text>
           {menuItems.map((item, index) => (
-            <TouchableOpacity 
+            <TouchableOpacity
               key={index}
-              style={[
-                styles.menuItem, 
-                item.highlighted && styles.menuItemHighlighted
-              ]}
-              onPress={item.action}
+              style={[styles.menuItem, item.highlight && styles.menuItemHighlight]}
+              onPress={() => router.push(item.route as any)}
             >
-              <View style={styles.menuItemLeft}>
-                <View style={[
-                  styles.iconContainer, 
-                  item.highlighted && styles.iconContainerHighlighted
-                ]}>
-                  <IconSymbol 
-                    ios_icon_name={item.icon} 
-                    android_material_icon_name={item.androidIcon}
-                    size={24}
-                    color={item.highlighted ? '#fff' : colors.text}
-                  />
-                </View>
-                <View style={styles.menuItemText}>
-                  <Text style={[
-                    styles.menuItemTitle, 
-                    item.highlighted && styles.menuItemTitleHighlighted
-                  ]}>
-                    {item.title}
-                  </Text>
-                  <Text style={[
-                    styles.menuItemSubtitle, 
-                    item.highlighted && styles.menuItemSubtitleHighlighted
-                  ]}>
-                    {item.subtitle}
-                  </Text>
-                </View>
+              <View style={styles.menuItemIcon}>
+                <IconSymbol 
+                  ios_icon_name={item.icon} 
+                  android_material_icon_name={item.androidIcon} 
+                  size={28} 
+                  color={item.highlight ? '#000' : colors.primary} 
+                />
+              </View>
+              <View style={styles.menuItemContent}>
+                <Text style={[styles.menuItemTitle, item.highlight && styles.menuItemTitleHighlight]}>
+                  {item.title}
+                </Text>
+                <Text style={[styles.menuItemDescription, item.highlight && styles.menuItemDescriptionHighlight]}>
+                  {item.description}
+                </Text>
               </View>
               <IconSymbol 
                 ios_icon_name="chevron.right" 
-                android_material_icon_name="chevron_right"
-                size={20}
-                color={item.highlighted ? '#fff' : colors.textSecondary}
+                android_material_icon_name="chevron_right" 
+                size={20} 
+                color={item.highlight ? '#000' : colors.text} 
               />
             </TouchableOpacity>
           ))}
         </View>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <IconSymbol 
-            ios_icon_name="arrow.right.square" 
-            android_material_icon_name="logout"
-            size={20}
-            color="#ff4444"
-          />
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>App Information</Text>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Version:</Text>
+            <Text style={styles.infoValue}>1.0.0</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Team:</Text>
+            <Text style={styles.infoValue}>Team SOFAST LLC</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Status:</Text>
+            <Text style={styles.infoValue}>✅ Ready to Submit</Text>
+          </View>
+        </View>
+
+        <View style={styles.statusCard}>
+          <Text style={styles.statusTitle}>✅ Your App is Complete!</Text>
+          <Text style={styles.statusText}>
+            All features are working. You just need to:
+          </Text>
+          <Text style={styles.statusBullet}>1. Create Privacy Policy & Support pages</Text>
+          <Text style={styles.statusBullet}>2. Join Apple Developer Program ($99/year)</Text>
+          <Text style={styles.statusBullet}>3. Submit to App Store</Text>
+          <Text style={styles.statusFooter}>
+            Tap "Help Guide" above for detailed instructions!
+          </Text>
+        </View>
       </ScrollView>
     </View>
   );
@@ -164,6 +120,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  header: {
+    paddingTop: Platform.OS === 'android' ? 60 : 70,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    backgroundColor: colors.cardBackground,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: 5,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: colors.secondaryText,
+  },
   content: {
     flex: 1,
   },
@@ -171,112 +145,121 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 100,
   },
-  profileHeader: {
-    alignItems: 'center',
-    paddingVertical: 30,
+  bigNotice: {
+    backgroundColor: colors.primary,
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    borderWidth: 3,
+    borderColor: '#FFD700',
   },
-  avatarContainer: {
-    marginBottom: 16,
+  bigNoticeTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000',
+    textAlign: 'center',
+    marginBottom: 10,
   },
-  nameText: {
-    fontSize: 24,
+  bigNoticeText: {
+    fontSize: 16,
+    color: '#000',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  section: {
+    marginBottom: 25,
+  },
+  sectionTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
     color: colors.text,
-    marginBottom: 4,
-  },
-  emailText: {
-    fontSize: 15,
-    color: colors.textSecondary,
-  },
-  noticeCard: {
-    flexDirection: 'row',
-    backgroundColor: colors.primary + '20',
-    padding: 20,
-    borderRadius: 16,
-    gap: 16,
-    marginBottom: 24,
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  noticeContent: {
-    flex: 1,
-  },
-  noticeTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  noticeText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    lineHeight: 20,
-  },
-  menuSection: {
-    marginTop: 20,
+    marginBottom: 15,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surface,
-    padding: 16,
+    backgroundColor: colors.cardBackground,
+    padding: 15,
     borderRadius: 12,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  menuItemHighlighted: {
+  menuItemHighlight: {
     backgroundColor: colors.primary,
+    borderColor: '#FFD700',
     borderWidth: 2,
-    borderColor: colors.primary,
   },
-  menuItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
+  menuItemIcon: {
+    marginRight: 15,
   },
-  iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  iconContainerHighlighted: {
-    backgroundColor: `${colors.primary}30`,
-  },
-  menuItemText: {
+  menuItemContent: {
     flex: 1,
   },
   menuItemTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.text,
-    marginBottom: 2,
+    marginBottom: 4,
   },
-  menuItemTitleHighlighted: {
-    color: '#fff',
-    fontWeight: '700',
+  menuItemTitleHighlight: {
+    color: '#000',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
-  menuItemSubtitle: {
+  menuItemDescription: {
     fontSize: 13,
-    color: colors.textSecondary,
+    color: colors.secondaryText,
   },
-  menuItemSubtitleHighlighted: {
-    color: 'rgba(255, 255, 255, 0.8)',
+  menuItemDescriptionHighlight: {
+    color: '#000',
+    fontSize: 14,
   },
-  logoutButton: {
+  infoRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    marginTop: 20,
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
-  logoutText: {
+  infoLabel: {
+    fontSize: 16,
+    color: colors.secondaryText,
+  },
+  infoValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#ff4444',
-    marginLeft: 8,
+    color: colors.text,
+  },
+  statusCard: {
+    backgroundColor: colors.cardBackground,
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  statusTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.primary,
+    marginBottom: 10,
+  },
+  statusText: {
+    fontSize: 15,
+    color: colors.text,
+    marginBottom: 10,
+  },
+  statusBullet: {
+    fontSize: 15,
+    color: colors.text,
+    marginLeft: 10,
+    marginBottom: 5,
+  },
+  statusFooter: {
+    fontSize: 14,
+    color: colors.primary,
+    fontWeight: '600',
+    marginTop: 10,
+    textAlign: 'center',
   },
 });
