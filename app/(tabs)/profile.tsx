@@ -16,13 +16,6 @@ export default function Profile() {
       androidIcon: 'upload',
       route: '/submission-guide',
     },
-    {
-      title: 'Credentials',
-      description: 'View your API keys and Team IDs',
-      icon: 'key.fill',
-      androidIcon: 'key',
-      route: '/credentials',
-    },
   ];
 
   return (
