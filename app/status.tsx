@@ -10,9 +10,17 @@ export default function StatusScreen() {
   const router = useRouter();
   const [showEmailInfo, setShowEmailInfo] = useState(false);
 
-  const emailTemplate = `Hi,
+  const emailTemplate = `Hi Natively Team,
 
-Can you tell me the current status of my SOFAST Global app?
+I noticed my SOFAST Global app is not showing up in App Store Connect or App Developer Portal yet.
+
+Here's my information:
+
+Apple Developer Team ID: 8V52T9GNF9
+Bundle Identifier: com.teamsofast.sofastglobal
+App Name: SOFAST Global Drills
+
+Can you help me understand what needs to happen next to get my app registered in App Store Connect?
 
 Thanks!`;
 
@@ -41,7 +49,7 @@ Thanks!`;
       console.log('Opening mail composer...');
       const result = await MailComposer.composeAsync({
         recipients: ['support@natively.app'],
-        subject: 'Status Check - SOFAST Global',
+        subject: 'App Not in App Store Connect - SOFAST Global',
         body: emailTemplate,
       });
 
@@ -82,7 +90,7 @@ Thanks!`;
     <View style={styles.container}>
       <Stack.Screen 
         options={{
-          title: 'Where Am I?',
+          title: 'App Status',
           headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.text,
         }}
@@ -91,71 +99,124 @@ Thanks!`;
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         <View style={styles.header}>
           <IconSymbol 
-            ios_icon_name="map.fill" 
-            android_material_icon_name="map"
+            ios_icon_name="exclamationmark.triangle.fill" 
+            android_material_icon_name="warning"
             size={80}
-            color={colors.primary}
+            color="#FF9500"
           />
-          <Text style={styles.title}>Your Current Status</Text>
-        </View>
-
-        {/* Current Stage */}
-        <View style={styles.currentCard}>
-          <View style={styles.currentBadge}>
-            <Text style={styles.currentBadgeText}>YOU ARE HERE</Text>
-          </View>
-          <Text style={styles.currentTitle}>App is Built & Working!</Text>
-          <Text style={styles.currentDescription}>
-            Your SOFAST Global app is fully functional and running on your device right now. You can use all the features!
+          <Text style={styles.title}>App Not in App Store Connect</Text>
+          <Text style={styles.subtitle}>
+            This is normal - let&apos;s fix it together!
           </Text>
-          <View style={styles.checkItem}>
-            <IconSymbol 
-              ios_icon_name="checkmark.circle.fill" 
-              android_material_icon_name="check_circle"
-              size={24}
-              color="#34C759"
-            />
-            <Text style={styles.checkText}>App is built ✓</Text>
-          </View>
-          <View style={styles.checkItem}>
-            <IconSymbol 
-              ios_icon_name="checkmark.circle.fill" 
-              android_material_icon_name="check_circle"
-              size={24}
-              color="#34C759"
-            />
-            <Text style={styles.checkText}>All features working ✓</Text>
-          </View>
-          <View style={styles.checkItem}>
-            <IconSymbol 
-              ios_icon_name="checkmark.circle.fill" 
-              android_material_icon_name="check_circle"
-              size={24}
-              color="#34C759"
-            />
-            <Text style={styles.checkText}>Testing on your device ✓</Text>
-          </View>
         </View>
 
-        {/* Next Step */}
-        <View style={styles.nextCard}>
-          <Text style={styles.nextTitle}>Next Step: Get in App Store</Text>
-          <Text style={styles.nextDescription}>
-            To get your app in the Apple App Store where anyone can download it, you need to:
+        {/* Current Situation */}
+        <View style={styles.situationCard}>
+          <Text style={styles.cardTitle}>What&apos;s Happening?</Text>
+          <Text style={styles.cardDescription}>
+            Your app is built and working on your device, but it hasn&apos;t been registered in Apple&apos;s App Store Connect system yet. This is a normal step in the process.
           </Text>
           
-          <View style={styles.stepsList}>
-            <View style={styles.stepItem}>
-              <View style={styles.stepDot} />
-              <Text style={styles.stepText}>Have an Apple Developer account ($99/year)</Text>
+          <View style={styles.statusList}>
+            <View style={styles.statusItem}>
+              <IconSymbol 
+                ios_icon_name="checkmark.circle.fill" 
+                android_material_icon_name="check_circle"
+                size={24}
+                color="#34C759"
+              />
+              <Text style={styles.statusText}>App is built and working</Text>
             </View>
-            <View style={styles.stepItem}>
-              <View style={styles.stepDot} />
-              <Text style={styles.stepText}>Create 3 simple web pages (Privacy, Support, Marketing)</Text>
+            <View style={styles.statusItem}>
+              <IconSymbol 
+                ios_icon_name="checkmark.circle.fill" 
+                android_material_icon_name="check_circle"
+                size={24}
+                color="#34C759"
+              />
+              <Text style={styles.statusText}>You have Apple Developer account</Text>
             </View>
-            <View style={styles.stepItem}>
-              <View style={styles.stepDot} />
-              <Text style={styles.stepText}>Email Natively support with your info</Text>
+            <View style={styles.statusItem}>
+              <IconSymbol 
+                ios_icon_name="xmark.circle.fill" 
+                android_material_icon_name="cancel"
+                size={24}
+                color="#FF9500"
+              />
+              <Text style={styles.statusText}>App not registered in App Store Connect</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Why This Happens */}
+        <View style={styles.explainCard}>
+          <IconSymbol 
+            ios_icon_name="info.circle.fill" 
+            android_material_icon_name="info"
+            size={48}
+            color={colors.primary}
+          />
+          <Text style={styles.explainTitle}>Why Isn&apos;t It There Yet?</Text>
+          <Text style={styles.explainText}>
+            Before an app can be submitted to the App Store, it needs to be created as an &quot;App Record&quot; in App Store Connect. This is a one-time setup that requires:
+          </Text>
+          
+          <View style={styles.requirementsList}>
+            <View style={styles.requirementItem}>
+              <View style={styles.requirementDot} />
+              <Text style={styles.requirementText}>Bundle Identifier (you have this: com.teamsofast.sofastglobal)</Text>
+            </View>
+            <View style={styles.requirementItem}>
+              <View style={styles.requirementDot} />
+              <Text style={styles.requirementText}>App Name (you have this: SOFAST Global Drills)</Text>
+            </View>
+            <View style={styles.requirementItem}>
+              <View style={styles.requirementDot} />
+              <Text style={styles.requirementText}>Privacy Policy URL (you need to create this)</Text>
+            </View>
+            <View style={styles.requirementItem}>
+              <View style={styles.requirementDot} />
+              <Text style={styles.requirementText}>Support URL (you need to create this)</Text>
+            </View>
+            <View style={styles.requirementItem}>
+              <View style={styles.requirementDot} />
+              <Text style={styles.requirementText}>Marketing URL (you need to create this)</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* What You Need to Do */}
+        <View style={styles.actionCard}>
+          <Text style={styles.actionTitle}>What You Need to Do:</Text>
+          
+          <View style={styles.actionStep}>
+            <View style={styles.actionNumber}>
+              <Text style={styles.actionNumberText}>1</Text>
+            </View>
+            <View style={styles.actionContent}>
+              <Text style={styles.actionStepTitle}>Create 3 Simple Web Pages</Text>
+              <Text style={styles.actionStepDesc}>
+                Use Google Sites (free) to create:
+                {'\n'}• Privacy Policy page
+                {'\n'}• Support page
+                {'\n'}• Marketing page
+                {'\n\n'}Each can be just a few sentences!
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.actionStep}>
+            <View style={styles.actionNumber}>
+              <Text style={styles.actionNumberText}>2</Text>
+            </View>
+            <View style={styles.actionContent}>
+              <Text style={styles.actionStepTitle}>Email Natively Support</Text>
+              <Text style={styles.actionStepDesc}>
+                Send your 3 URLs to Natively. They will:
+                {'\n'}• Create your app in App Store Connect
+                {'\n'}• Configure everything properly
+                {'\n'}• Submit it to Apple for review
+              </Text>
             </View>
           </View>
 
@@ -163,7 +224,7 @@ Thanks!`;
             style={styles.guideButton}
             onPress={() => router.push('/launch-guide')}
           >
-            <Text style={styles.guideButtonText}>View Simple Step-by-Step Guide</Text>
+            <Text style={styles.guideButtonText}>View Complete Step-by-Step Guide</Text>
             <IconSymbol 
               ios_icon_name="arrow.right.circle.fill" 
               android_material_icon_name="arrow_circle_right"
@@ -173,74 +234,24 @@ Thanks!`;
           </TouchableOpacity>
         </View>
 
-        {/* What You Don't Need */}
-        <View style={styles.dontNeedCard}>
-          <Text style={styles.dontNeedTitle}>What You DON&apos;T Need to Do:</Text>
-          
-          <View style={styles.dontNeedItem}>
-            <IconSymbol 
-              ios_icon_name="xmark.circle.fill" 
-              android_material_icon_name="cancel"
-              size={24}
-              color="#FF3B30"
-            />
-            <Text style={styles.dontNeedText}>You don&apos;t need to understand GitHub</Text>
-          </View>
-          <View style={styles.dontNeedItem}>
-            <IconSymbol 
-              ios_icon_name="xmark.circle.fill" 
-              android_material_icon_name="cancel"
-              size={24}
-              color="#FF3B30"
-            />
-            <Text style={styles.dontNeedText}>You don&apos;t need to build the app yourself</Text>
-          </View>
-          <View style={styles.dontNeedItem}>
-            <IconSymbol 
-              ios_icon_name="xmark.circle.fill" 
-              android_material_icon_name="cancel"
-              size={24}
-              color="#FF3B30"
-            />
-            <Text style={styles.dontNeedText}>You don&apos;t need to know what EAS or Expo means</Text>
-          </View>
-          <View style={styles.dontNeedItem}>
-            <IconSymbol 
-              ios_icon_name="xmark.circle.fill" 
-              android_material_icon_name="cancel"
-              size={24}
-              color="#FF3B30"
-            />
-            <Text style={styles.dontNeedText}>You don&apos;t need to edit any code files</Text>
-          </View>
-          <View style={styles.dontNeedItem}>
-            <IconSymbol 
-              ios_icon_name="xmark.circle.fill" 
-              android_material_icon_name="cancel"
-              size={24}
-              color="#FF3B30"
-            />
-            <Text style={styles.dontNeedText}>You don&apos;t need to buy any tokens</Text>
-          </View>
-        </View>
-
-        {/* Check Status */}
-        <View style={styles.statusCard}>
-          <IconSymbol 
-            ios_icon_name="questionmark.circle.fill" 
-            android_material_icon_name="help"
-            size={48}
-            color={colors.primary}
-          />
-          <Text style={styles.statusTitle}>Want to Check Your Submission Status?</Text>
-          <Text style={styles.statusDescription}>
-            If you&apos;ve already emailed Natively support and want to know where your submission is, just email them again!
+        {/* Quick Email */}
+        <View style={styles.emailCard}>
+          <Text style={styles.emailTitle}>Need Help Right Now?</Text>
+          <Text style={styles.emailDescription}>
+            Email Natively support and they&apos;ll walk you through exactly what you need to do.
           </Text>
+          
           <TouchableOpacity 
-            style={styles.statusButton}
+            style={styles.emailButton}
             onPress={openEmail}
           >
-            <Text style={styles.statusButtonText}>Email: &quot;What&apos;s My Status?&quot;</Text>
+            <IconSymbol 
+              ios_icon_name="envelope.fill" 
+              android_material_icon_name="email"
+              size={24}
+              color="#fff"
+            />
+            <Text style={styles.emailButtonText}>Email Support Now</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -253,9 +264,22 @@ Thanks!`;
           </TouchableOpacity>
         </View>
 
+        {/* Important Note */}
+        <View style={styles.noteCard}>
+          <IconSymbol 
+            ios_icon_name="lightbulb.fill" 
+            android_material_icon_name="lightbulb"
+            size={32}
+            color="#FFD60A"
+          />
+          <Text style={styles.noteText}>
+            <Text style={styles.noteBold}>Important:</Text> You don&apos;t need to create the app in App Store Connect yourself. Natively will do this for you once you provide the 3 required URLs. This is part of their service!
+          </Text>
+        </View>
+
         {/* Timeline */}
         <View style={styles.timelineCard}>
-          <Text style={styles.timelineTitle}>Typical Timeline:</Text>
+          <Text style={styles.timelineTitle}>What Happens Next:</Text>
           
           <View style={styles.timelineRow}>
             <View style={styles.timelineIcon}>
@@ -267,8 +291,8 @@ Thanks!`;
               />
             </View>
             <View style={styles.timelineInfo}>
-              <Text style={styles.timelineLabel}>Right Now</Text>
-              <Text style={styles.timelineDesc}>App is working on your device</Text>
+              <Text style={styles.timelineLabel}>Today</Text>
+              <Text style={styles.timelineDesc}>Create your 3 web pages (5-10 minutes)</Text>
             </View>
           </View>
 
@@ -282,8 +306,8 @@ Thanks!`;
               />
             </View>
             <View style={styles.timelineInfo}>
-              <Text style={styles.timelineLabel}>When You&apos;re Ready</Text>
-              <Text style={styles.timelineDesc}>Email Natively with your 3 URLs</Text>
+              <Text style={styles.timelineLabel}>Today</Text>
+              <Text style={styles.timelineDesc}>Email your URLs to Natively</Text>
             </View>
           </View>
 
@@ -297,8 +321,8 @@ Thanks!`;
               />
             </View>
             <View style={styles.timelineInfo}>
-              <Text style={styles.timelineLabel}>1-3 Days Later</Text>
-              <Text style={styles.timelineDesc}>Natively submits to Apple</Text>
+              <Text style={styles.timelineLabel}>1-2 Days</Text>
+              <Text style={styles.timelineDesc}>Natively creates app in App Store Connect</Text>
             </View>
           </View>
 
@@ -312,7 +336,22 @@ Thanks!`;
               />
             </View>
             <View style={styles.timelineInfo}>
-              <Text style={styles.timelineLabel}>5-12 Days Later</Text>
+              <Text style={styles.timelineLabel}>3-4 Days</Text>
+              <Text style={styles.timelineDesc}>Natively submits to Apple</Text>
+            </View>
+          </View>
+
+          <View style={styles.timelineRow}>
+            <View style={styles.timelineIcon}>
+              <IconSymbol 
+                ios_icon_name="checkmark.circle.fill" 
+                android_material_icon_name="check_circle"
+                size={32}
+                color="#34C759"
+              />
+            </View>
+            <View style={styles.timelineInfo}>
+              <Text style={styles.timelineLabel}>7-14 Days</Text>
               <Text style={styles.timelineDesc}>App is live in App Store! 🎉</Text>
             </View>
           </View>
@@ -352,7 +391,7 @@ Thanks!`;
             <View style={styles.infoSection}>
               <Text style={styles.infoLabel}>Subject:</Text>
               <View style={styles.infoBox}>
-                <Text style={styles.infoText}>Status Check - SOFAST Global</Text>
+                <Text style={styles.infoText}>App Not in App Store Connect - SOFAST Global</Text>
               </View>
             </View>
 
@@ -418,86 +457,85 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '900',
     color: colors.text,
     marginTop: 16,
     textAlign: 'center',
   },
-  currentCard: {
-    backgroundColor: '#34C75920',
-    borderRadius: 20,
-    padding: 24,
-    marginBottom: 20,
-    borderWidth: 3,
-    borderColor: '#34C759',
-  },
-  currentBadge: {
-    backgroundColor: '#34C759',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    alignSelf: 'flex-start',
-    marginBottom: 16,
-  },
-  currentBadgeText: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#fff',
-    letterSpacing: 1,
-  },
-  currentTitle: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: colors.text,
-    marginBottom: 12,
-  },
-  currentDescription: {
-    fontSize: 17,
+  subtitle: {
+    fontSize: 18,
     color: colors.textSecondary,
-    lineHeight: 26,
-    marginBottom: 20,
+    marginTop: 8,
+    textAlign: 'center',
   },
-  checkItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 12,
-  },
-  checkText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  nextCard: {
+  situationCard: {
     backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 24,
     marginBottom: 20,
     borderWidth: 2,
-    borderColor: colors.primary,
+    borderColor: '#FF9500',
   },
-  nextTitle: {
+  cardTitle: {
     fontSize: 24,
     fontWeight: '900',
     color: colors.text,
     marginBottom: 12,
   },
-  nextDescription: {
+  cardDescription: {
     fontSize: 16,
     color: colors.textSecondary,
     lineHeight: 24,
-    marginBottom: 16,
-  },
-  stepsList: {
     marginBottom: 20,
   },
-  stepItem: {
+  statusList: {
+    gap: 12,
+  },
+  statusItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  statusText: {
+    flex: 1,
+    fontSize: 16,
+    color: colors.text,
+    fontWeight: '600',
+  },
+  explainCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 20,
+    borderWidth: 2,
+    borderColor: colors.border,
+    alignItems: 'center',
+  },
+  explainTitle: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: colors.text,
+    marginTop: 16,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  explainText: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    lineHeight: 24,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  requirementsList: {
+    width: '100%',
+    gap: 12,
+  },
+  requirementItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 12,
   },
-  stepDot: {
+  requirementDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
@@ -505,10 +543,56 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginRight: 12,
   },
-  stepText: {
+  requirementText: {
     flex: 1,
     fontSize: 15,
     color: colors.text,
+    lineHeight: 22,
+  },
+  actionCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 20,
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+  actionTitle: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: colors.text,
+    marginBottom: 20,
+  },
+  actionStep: {
+    flexDirection: 'row',
+    marginBottom: 24,
+  },
+  actionNumber: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  actionNumberText: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#fff',
+  },
+  actionContent: {
+    flex: 1,
+  },
+  actionStepTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 8,
+  },
+  actionStepDesc: {
+    fontSize: 15,
+    color: colors.textSecondary,
     lineHeight: 22,
   },
   guideButton: {
@@ -518,13 +602,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     padding: 18,
     borderRadius: 12,
+    marginTop: 8,
   },
   guideButtonText: {
     fontSize: 17,
     fontWeight: '700',
     color: '#fff',
   },
-  dontNeedCard: {
+  emailCard: {
     backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 24,
@@ -532,55 +617,28 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.border,
   },
-  dontNeedTitle: {
+  emailTitle: {
     fontSize: 22,
     fontWeight: '900',
     color: colors.text,
-    marginBottom: 20,
-  },
-  dontNeedItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
-  },
-  dontNeedText: {
-    flex: 1,
-    fontSize: 15,
-    color: colors.textSecondary,
-    lineHeight: 22,
-  },
-  statusCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 20,
-    padding: 28,
-    alignItems: 'center',
-    marginBottom: 20,
-    borderWidth: 2,
-    borderColor: colors.border,
-  },
-  statusTitle: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: colors.text,
-    marginTop: 16,
     marginBottom: 12,
-    textAlign: 'center',
   },
-  statusDescription: {
+  emailDescription: {
     fontSize: 16,
     color: colors.textSecondary,
-    textAlign: 'center',
     lineHeight: 24,
     marginBottom: 20,
   },
-  statusButton: {
+  emailButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.primary,
-    paddingHorizontal: 32,
-    paddingVertical: 16,
+    padding: 18,
     borderRadius: 12,
+    gap: 12,
   },
-  statusButtonText: {
+  emailButtonText: {
     fontSize: 17,
     fontWeight: '700',
     color: '#fff',
@@ -588,12 +646,32 @@ const styles = StyleSheet.create({
   manualEmailButton: {
     marginTop: 12,
     padding: 12,
+    alignItems: 'center',
   },
   manualEmailButtonText: {
     fontSize: 14,
     color: colors.textSecondary,
     textAlign: 'center',
     textDecorationLine: 'underline',
+  },
+  noteCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FFD60A20',
+    padding: 20,
+    borderRadius: 12,
+    gap: 16,
+    marginBottom: 20,
+    borderWidth: 2,
+    borderColor: '#FFD60A',
+  },
+  noteText: {
+    flex: 1,
+    fontSize: 15,
+    color: colors.text,
+    lineHeight: 22,
+  },
+  noteBold: {
+    fontWeight: '900',
   },
   timelineCard: {
     backgroundColor: colors.surface,
