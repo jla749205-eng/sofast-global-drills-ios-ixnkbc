@@ -32,6 +32,7 @@ export default function CameraScreen() {
   const startTimeRef = useRef<number>(0);
   const lastShotTimeRef = useRef<number>(0);
   const gyroSubscriptionRef = useRef<any>(null);
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   const shotDetectorRef = useRef(new ShotDetector());
   const flinchDetectorRef = useRef(new FlinchDetector());
@@ -39,112 +40,158 @@ export default function CameraScreen() {
   const parTimerRef = useRef(new ParTimer());
 
   useEffect(() => {
-    // Copy ref values to variables for cleanup
     const audioAnalyzer = audioAnalyzerRef.current;
     const parTimer = parTimerRef.current;
     
-    parTimer.initialize();
+    const initializeServices = async () => {
+      try {
+        await parTimer.initialize();
+      } catch (error) {
+        console.error('Error initializing services:', error);
+      }
+    };
+    
+    initializeServices();
     
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (gyroSubscriptionRef.current) {
-        gyroSubscriptionRef.current.remove();
+      try {
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+        if (countdownIntervalRef.current) {
+          clearInterval(countdownIntervalRef.current);
+          countdownIntervalRef.current = null;
+        }
+        if (gyroSubscriptionRef.current) {
+          gyroSubscriptionRef.current.remove();
+          gyroSubscriptionRef.current = null;
+        }
+        audioAnalyzer.stopAnalyzing().catch(err => console.error('Error stopping audio:', err));
+        parTimer.cleanup();
+      } catch (error) {
+        console.error('Error in cleanup:', error);
       }
-      audioAnalyzer.stopAnalyzing();
-      parTimer.cleanup();
     };
   }, []);
 
   const setupSensors = async () => {
-    console.log('Setting up sensors for shot detection');
-    
-    // Setup gyroscope
-    Gyroscope.setUpdateInterval(16); // ~60fps
-    
-    gyroSubscriptionRef.current = Gyroscope.addListener(gyroscopeData => {
-      // Add to flinch detector
-      flinchDetectorRef.current.addGyroSample(
-        gyroscopeData.x,
-        gyroscopeData.y,
-        gyroscopeData.z
-      );
+    try {
+      console.log('Setting up sensors for shot detection');
+      
+      // Setup gyroscope
+      Gyroscope.setUpdateInterval(16);
+      
+      gyroSubscriptionRef.current = Gyroscope.addListener(gyroscopeData => {
+        try {
+          flinchDetectorRef.current.addGyroSample(
+            gyroscopeData.x,
+            gyroscopeData.y,
+            gyroscopeData.z
+          );
 
-      // Check for shot via gyro
-      const gyroResult = shotDetectorRef.current.processGyroData(
-        gyroscopeData.x,
-        gyroscopeData.y,
-        gyroscopeData.z
-      );
+          const gyroResult = shotDetectorRef.current.processGyroData(
+            gyroscopeData.x,
+            gyroscopeData.y,
+            gyroscopeData.z
+          );
 
-      if (gyroResult) {
-        handleShotDetected(gyroResult.timestamp);
+          if (gyroResult) {
+            handleShotDetected(gyroResult.timestamp);
+          }
+        } catch (error) {
+          console.error('Error processing gyro data:', error);
+        }
+      });
+
+      // Setup audio analyzer
+      try {
+        await audioAnalyzerRef.current.startAnalyzing((level) => {
+          try {
+            const audioResult = shotDetectorRef.current.processAudioLevel(level);
+            if (audioResult) {
+              handleShotDetected(audioResult.timestamp);
+            }
+          } catch (error) {
+            console.error('Error processing audio level:', error);
+          }
+        });
+      } catch (error) {
+        console.error('Error starting audio analyzer:', error);
       }
-    });
 
-    // Setup audio analyzer
-    await audioAnalyzerRef.current.startAnalyzing((level) => {
-      const audioResult = shotDetectorRef.current.processAudioLevel(level);
-      if (audioResult) {
-        handleShotDetected(audioResult.timestamp);
-      }
-    });
-
-    shotDetectorRef.current.startMonitoring();
+      shotDetectorRef.current.startMonitoring();
+    } catch (error) {
+      console.error('Error setting up sensors:', error);
+    }
   };
 
   const handleShotDetected = (timestamp: number) => {
-    const now = timestamp;
-    const timeSinceStart = (now - startTimeRef.current) / 1000;
-    
-    // Calculate split time
-    if (lastShotTimeRef.current > 0) {
-      const split = (now - lastShotTimeRef.current) / 1000;
-      setSplits(prev => [...prev, split]);
+    try {
+      const now = timestamp;
+      const timeSinceStart = (now - startTimeRef.current) / 1000;
+      
+      if (lastShotTimeRef.current > 0) {
+        const split = (now - lastShotTimeRef.current) / 1000;
+        setSplits(prev => [...prev, split]);
+      }
+      
+      const hasFlinch = flinchDetectorRef.current.detectFlinch(timestamp);
+      if (hasFlinch) {
+        setFlinchCount(prev => prev + 1);
+      }
+      
+      lastShotTimeRef.current = now;
+      setShotCount(prev => prev + 1);
+      
+      console.log(`Shot ${shotCount + 1} detected at ${timeSinceStart.toFixed(2)}s${hasFlinch ? ' (FLINCH)' : ''}`);
+    } catch (error) {
+      console.error('Error handling shot detection:', error);
     }
-    
-    // Check for flinch
-    const hasFlinch = flinchDetectorRef.current.detectFlinch(timestamp);
-    if (hasFlinch) {
-      setFlinchCount(prev => prev + 1);
-    }
-    
-    lastShotTimeRef.current = now;
-    setShotCount(prev => prev + 1);
-    
-    console.log(`Shot ${shotCount + 1} detected at ${timeSinceStart.toFixed(2)}s${hasFlinch ? ' (FLINCH)' : ''}`);
   };
 
   const startDrill = async () => {
-    if (!cameraPermission?.granted || !micPermission?.granted) {
-      Alert.alert(
-        'Permissions Required',
-        'Camera and microphone permissions are needed to record drills.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Grant Permissions', 
-            onPress: async () => {
-              await requestCameraPermission();
-              await requestMicPermission();
+    try {
+      if (!cameraPermission?.granted || !micPermission?.granted) {
+        Alert.alert(
+          'Permissions Required',
+          'Camera and microphone permissions are needed to record drills.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { 
+              text: 'Grant Permissions', 
+              onPress: async () => {
+                try {
+                  await requestCameraPermission();
+                  await requestMicPermission();
+                } catch (error) {
+                  console.error('Error requesting permissions:', error);
+                }
+              }
             }
-          }
-        ]
-      );
-      return;
-    }
+          ]
+        );
+        return;
+      }
 
-    // Start countdown
-    setCountdown(3);
-    const countdownInterval = setInterval(() => {
-      setCountdown(prev => {
-        if (prev === null || prev <= 1) {
-          clearInterval(countdownInterval);
-          beginRecording();
-          return null;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+      setCountdown(3);
+      countdownIntervalRef.current = setInterval(() => {
+        setCountdown(prev => {
+          if (prev === null || prev <= 1) {
+            if (countdownIntervalRef.current) {
+              clearInterval(countdownIntervalRef.current);
+              countdownIntervalRef.current = null;
+            }
+            beginRecording();
+            return null;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      console.error('Error starting drill:', error);
+      Alert.alert('Error', 'Failed to start drill');
+    }
   };
 
   const beginRecording = async () => {
@@ -158,26 +205,35 @@ export default function CameraScreen() {
       setSplits([]);
       setFlinchCount(0);
       
-      // Play start beep
-      await parTimerRef.current.playStartBeep();
-      
-      // Start camera recording
-      if (cameraRef.current) {
-        cameraRef.current.recordAsync();
+      try {
+        await parTimerRef.current.playStartBeep();
+      } catch (error) {
+        console.error('Error playing start beep:', error);
       }
       
-      // Start sensors
+      try {
+        if (cameraRef.current && cameraRef.current.recordAsync) {
+          cameraRef.current.recordAsync().catch((err: Error) => {
+            console.error('Camera recording error:', err);
+          });
+        }
+      } catch (error) {
+        console.error('Error starting camera recording:', error);
+      }
+      
       await setupSensors();
       
-      // Start par timer if drill has par time
       if (drill?.parTime) {
-        parTimerRef.current.startParTimer(drill.parTime, () => {
-          setParReached(true);
-          console.log('Par time reached!');
-        });
+        try {
+          parTimerRef.current.startParTimer(drill.parTime, () => {
+            setParReached(true);
+            console.log('Par time reached!');
+          });
+        } catch (error) {
+          console.error('Error starting par timer:', error);
+        }
       }
       
-      // Start elapsed time timer
       timerRef.current = setInterval(() => {
         const elapsed = (Date.now() - startTimeRef.current) / 1000;
         setElapsedTime(elapsed);
@@ -186,6 +242,7 @@ export default function CameraScreen() {
     } catch (error) {
       console.error('Error starting recording:', error);
       Alert.alert('Error', 'Failed to start recording');
+      setIsRecording(false);
     }
   };
 
@@ -194,30 +251,41 @@ export default function CameraScreen() {
       console.log('Stopping recording...');
       setIsRecording(false);
       
-      // Stop timer
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
       
-      // Stop par timer
-      parTimerRef.current.stopParTimer();
+      try {
+        parTimerRef.current.stopParTimer();
+      } catch (error) {
+        console.error('Error stopping par timer:', error);
+      }
       
-      // Stop sensors
       if (gyroSubscriptionRef.current) {
-        gyroSubscriptionRef.current.remove();
-        gyroSubscriptionRef.current = null;
+        try {
+          gyroSubscriptionRef.current.remove();
+          gyroSubscriptionRef.current = null;
+        } catch (error) {
+          console.error('Error removing gyro subscription:', error);
+        }
       }
       
-      shotDetectorRef.current.stopMonitoring();
-      await audioAnalyzerRef.current.stopAnalyzing();
-      
-      // Stop camera recording
-      if (cameraRef.current) {
-        await cameraRef.current.stopRecording();
+      try {
+        shotDetectorRef.current.stopMonitoring();
+        await audioAnalyzerRef.current.stopAnalyzing();
+      } catch (error) {
+        console.error('Error stopping sensors:', error);
       }
       
-      // Navigate to target photo screen for accuracy verification
+      try {
+        if (cameraRef.current && cameraRef.current.stopRecording) {
+          await cameraRef.current.stopRecording();
+        }
+      } catch (error) {
+        console.error('Error stopping camera:', error);
+      }
+      
       router.push({
         pathname: '/target-photo/[id]',
         params: {
@@ -260,8 +328,12 @@ export default function CameraScreen() {
           <TouchableOpacity
             style={styles.permissionButton}
             onPress={async () => {
-              await requestCameraPermission();
-              await requestMicPermission();
+              try {
+                await requestCameraPermission();
+                await requestMicPermission();
+              } catch (error) {
+                console.error('Error requesting permissions:', error);
+              }
             }}
           >
             <Text style={styles.permissionButtonText}>Grant Permissions</Text>
@@ -286,7 +358,6 @@ export default function CameraScreen() {
         mode="video"
         mute={false}
       >
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.closeButton}
@@ -304,7 +375,6 @@ export default function CameraScreen() {
           <View style={{ width: 40 }} />
         </View>
 
-        {/* Countdown Overlay */}
         {countdown !== null && (
           <View style={styles.countdownOverlay}>
             <Text style={styles.countdownText}>{countdown}</Text>
@@ -312,7 +382,6 @@ export default function CameraScreen() {
           </View>
         )}
 
-        {/* Recording Stats */}
         {isRecording && (
           <View style={styles.statsOverlay}>
             <View style={styles.statBox}>
@@ -342,7 +411,6 @@ export default function CameraScreen() {
           </View>
         )}
 
-        {/* Flinch Warning */}
         {isRecording && flinchCount > 0 && (
           <View style={styles.flinchWarning}>
             <IconSymbol
@@ -355,7 +423,6 @@ export default function CameraScreen() {
           </View>
         )}
 
-        {/* Recording Indicator */}
         {isRecording && (
           <View style={styles.recordingIndicator}>
             <View style={styles.recordingDot} />
@@ -363,7 +430,6 @@ export default function CameraScreen() {
           </View>
         )}
 
-        {/* Control Buttons */}
         <View style={styles.controls}>
           {!isRecording ? (
             <TouchableOpacity
@@ -389,7 +455,6 @@ export default function CameraScreen() {
           )}
         </View>
 
-        {/* Instructions */}
         {!isRecording && countdown === null && (
           <View style={styles.instructionsOverlay}>
             <IconSymbol

@@ -1,21 +1,24 @@
 
-import { Audio, RecordingObject } from 'expo-av';
+// Audio analysis service for shot detection via microphone
+
+import { Audio } from 'expo-av';
 
 export class AudioAnalyzer {
-  private recording: RecordingObject | null = null;
+  private recording: Audio.Recording | null = null;
   private isAnalyzing = false;
-  private onLevelUpdate?: (level: number) => void;
-  private meteringInterval: NodeJS.Timeout | null = null;
+  private analysisInterval: NodeJS.Timeout | null = null;
 
-  async startAnalyzing(onLevelUpdate: (level: number) => void) {
+  constructor() {
+    console.log('AudioAnalyzer initialized');
+  }
+
+  async startAnalyzing(onLevelChange: (level: number) => void) {
     try {
       console.log('Starting audio analysis...');
-      this.onLevelUpdate = onLevelUpdate;
-      this.isAnalyzing = true;
-
+      
       // Request permissions
-      const { granted } = await Audio.requestPermissionsAsync();
-      if (!granted) {
+      const { status } = await Audio.requestPermissionsAsync();
+      if (status !== 'granted') {
         console.error('Audio permission not granted');
         return;
       }
@@ -24,34 +27,67 @@ export class AudioAnalyzer {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
       });
 
-      // Start recording with metering enabled
-      const { recording } = await Audio.Recording.createAsync(
-        {
+      // Create recording
+      this.recording = new Audio.Recording();
+      
+      try {
+        await this.recording.prepareToRecordAsync({
           ...Audio.RecordingOptionsPresets.HIGH_QUALITY,
-          isMeteringEnabled: true,
-        }
-      );
+          android: {
+            extension: '.m4a',
+            outputFormat: Audio.AndroidOutputFormat.MPEG_4,
+            audioEncoder: Audio.AndroidAudioEncoder.AAC,
+            sampleRate: 44100,
+            numberOfChannels: 2,
+            bitRate: 128000,
+          },
+          ios: {
+            extension: '.m4a',
+            outputFormat: Audio.IOSOutputFormat.MPEG4AAC,
+            audioQuality: Audio.IOSAudioQuality.HIGH,
+            sampleRate: 44100,
+            numberOfChannels: 2,
+            bitRate: 128000,
+            linearPCMBitDepth: 16,
+            linearPCMIsBigEndian: false,
+            linearPCMIsFloat: false,
+          },
+          web: {
+            mimeType: 'audio/webm',
+            bitsPerSecond: 128000,
+          },
+        });
 
-      this.recording = recording;
+        await this.recording.startAsync();
+        this.isAnalyzing = true;
 
-      // Poll metering data
-      this.meteringInterval = setInterval(async () => {
-        if (this.recording && this.isAnalyzing) {
-          const status = await this.recording.getStatusAsync();
-          if (status.isRecording && status.metering !== undefined) {
-            // Normalize metering value (typically -160 to 0 dB)
-            const normalizedLevel = Math.max(0, (status.metering + 160) / 160);
-            this.onLevelUpdate?.(normalizedLevel);
+        // Poll audio levels
+        this.analysisInterval = setInterval(async () => {
+          if (this.recording && this.isAnalyzing) {
+            try {
+              const status = await this.recording.getStatusAsync();
+              if (status.isRecording && status.metering !== undefined) {
+                // Normalize metering value (typically -160 to 0 dB)
+                // Convert to 0-1 range
+                const normalizedLevel = Math.max(0, Math.min(1, (status.metering + 160) / 160));
+                onLevelChange(normalizedLevel);
+              }
+            } catch (error) {
+              console.error('Error getting recording status:', error);
+            }
           }
-        }
-      }, 50); // Check every 50ms
+        }, 50); // Check every 50ms
 
-      console.log('Audio analysis started');
+        console.log('Audio analysis started successfully');
+      } catch (error) {
+        console.error('Error preparing/starting recording:', error);
+        this.isAnalyzing = false;
+      }
     } catch (error) {
       console.error('Error starting audio analysis:', error);
+      this.isAnalyzing = false;
     }
   }
 
@@ -60,23 +96,30 @@ export class AudioAnalyzer {
       console.log('Stopping audio analysis...');
       this.isAnalyzing = false;
 
-      if (this.meteringInterval) {
-        clearInterval(this.meteringInterval);
-        this.meteringInterval = null;
+      if (this.analysisInterval) {
+        clearInterval(this.analysisInterval);
+        this.analysisInterval = null;
       }
 
       if (this.recording) {
-        await this.recording.stopAndUnloadAsync();
+        try {
+          const status = await this.recording.getStatusAsync();
+          if (status.isRecording) {
+            await this.recording.stopAndUnloadAsync();
+          }
+        } catch (error) {
+          console.error('Error stopping recording:', error);
+        }
         this.recording = null;
       }
 
       console.log('Audio analysis stopped');
     } catch (error) {
-      console.error('Error stopping audio analysis:', error);
+      console.error('Error in stopAnalyzing:', error);
     }
   }
 
-  isActive() {
+  isActive(): boolean {
     return this.isAnalyzing;
   }
 }
