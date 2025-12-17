@@ -84,7 +84,7 @@ export default function RankingsScreen() {
             <IconSymbol
               ios_icon_name={entry.rank === 1 ? 'crown.fill' : 'medal.fill'}
               android_material_icon_name={entry.rank === 1 ? 'emoji_events' : 'military_tech'}
-              size={24}
+              size={20}
               color={entry.rank === 1 ? '#FFD700' : entry.rank === 2 ? '#C0C0C0' : '#CD7F32'}
             />
           ) : (
@@ -174,58 +174,15 @@ export default function RankingsScreen() {
             ]}>
               {division}
             </Text>
-            <Text style={[
-              styles.divisionButtonSubtext,
-              selectedDivision === division && styles.divisionButtonSubtextActive
-            ]}>
-              {DIVISION_INFO[division].name}
-            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
-      {/* Division Description */}
-      <View style={styles.divisionDescriptionContainer}>
-        <Text style={styles.divisionDescription}>
-          {DIVISION_INFO[selectedDivision].description}
-        </Text>
-      </View>
-
-      {/* Classification Legend */}
-      <View style={styles.legendContainer}>
-        <Text style={styles.legendTitle}>CLASSIFICATIONS</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.legendScroll}
-        >
-          {['Grand Master', 'Master', 'Expert', 'Sharpshooter', 'Marksman', 'Novice'].map((classification) => (
-            <View
-              key={classification}
-              style={[
-                styles.legendItem,
-                { borderColor: getClassificationColor(classification) }
-              ]}
-            >
-              <View style={[
-                styles.legendDot,
-                { backgroundColor: getClassificationColor(classification) }
-              ]} />
-              <Text style={styles.legendText}>{classification}</Text>
-            </View>
-          ))}
-        </ScrollView>
-      </View>
-
-      {/* Current User Ranking */}
+      {/* Current User Ranking - Compact */}
       {userRanking && (
         <View style={styles.currentUserContainer}>
-          <Text style={styles.currentUserTitle}>YOUR RANKING</Text>
+          <Text style={styles.currentUserTitle}>YOUR RANK: #{userRanking.rank}</Text>
           <View style={styles.currentUserStats}>
-            <View style={styles.currentUserStatBox}>
-              <Text style={styles.currentUserStatValue}>#{userRanking.rank}</Text>
-              <Text style={styles.currentUserStatLabel}>Global Rank</Text>
-            </View>
             <View style={styles.currentUserStatBox}>
               <Text style={[
                 styles.currentUserStatValue,
@@ -233,11 +190,9 @@ export default function RankingsScreen() {
               ]}>
                 {userRanking.classification}
               </Text>
-              <Text style={styles.currentUserStatLabel}>Classification</Text>
             </View>
             <View style={styles.currentUserStatBox}>
-              <Text style={styles.currentUserStatValue}>{userRanking.hitFactor.toFixed(2)}</Text>
-              <Text style={styles.currentUserStatLabel}>Hit Factor</Text>
+              <Text style={styles.currentUserStatValue}>{userRanking.hitFactor.toFixed(2)} HF</Text>
             </View>
           </View>
         </View>
@@ -256,45 +211,21 @@ export default function RankingsScreen() {
           </View>
         ) : (
           <>
-            <Text style={styles.sectionTitle}>TOP SHOOTERS</Text>
+            <Text style={styles.sectionTitle}>TOP SHOOTERS - {DIVISION_INFO[selectedDivision].name}</Text>
             {rankings.map(renderRankingItem)}
             
-            {/* Info Section */}
+            {/* Info Section - Compact */}
             <View style={styles.infoSection}>
               <IconSymbol
                 ios_icon_name="info.circle.fill"
                 android_material_icon_name="info"
-                size={24}
+                size={20}
                 color={colors.primary}
               />
               <View style={styles.infoTextContainer}>
                 <Text style={styles.infoTitle}>How Rankings Work</Text>
                 <Text style={styles.infoText}>
-                  Rankings are based on your Hit Factor (HF), calculated as Points ÷ Time. 
-                  Complete drills with verified target photos to improve your classification and climb the leaderboard!
-                </Text>
-                <Text style={styles.infoText}>
-                  IDPA Divisions follow the official rule book:
-                </Text>
-                <Text style={styles.infoText}>
-                  • SSP: Stock Service Pistol{'\n'}
-                  • ESP: Enhanced Service Pistol{'\n'}
-                  • CCP: Carry Concealed Pistol{'\n'}
-                  • CDP: Custom Defensive Pistol (.45 ACP){'\n'}
-                  • REV: Revolver{'\n'}
-                  • BUG: Back-Up Gun{'\n'}
-                  • PCC: Pistol Caliber Carbine
-                </Text>
-                <Text style={styles.infoText}>
-                  Classifications follow USPSA standards:
-                </Text>
-                <Text style={styles.infoText}>
-                  • Grand Master: 7.0+ HF{'\n'}
-                  • Master: 5.5+ HF{'\n'}
-                  • Expert: 4.0+ HF{'\n'}
-                  • Sharpshooter: 2.5+ HF{'\n'}
-                  • Marksman: 1.5+ HF{'\n'}
-                  • Novice: Below 1.5 HF
+                  Rankings are based on Hit Factor (Points ÷ Time). Complete drills with verified target photos to improve your classification and climb the leaderboard!
                 </Text>
               </View>
             </View>
@@ -319,7 +250,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'android' ? 48 : 60,
-    paddingBottom: 16,
+    paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary,
   },
@@ -336,101 +267,46 @@ const styles = StyleSheet.create({
   },
   divisionSelector: {
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: 12,
     gap: 8,
   },
   divisionButton: {
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.secondary,
     alignItems: 'center',
-    minWidth: 100,
+    minWidth: 60,
   },
   divisionButtonActive: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
   },
   divisionButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '800',
     color: colors.text,
   },
   divisionButtonTextActive: {
     color: colors.background,
   },
-  divisionButtonSubtext: {
-    fontSize: 9,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-  divisionButtonSubtextActive: {
-    color: colors.background,
-    opacity: 0.8,
-  },
-  divisionDescriptionContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-  },
-  divisionDescription: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  legendContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  legendTitle: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: colors.textSecondary,
-    letterSpacing: 2,
-    marginBottom: 8,
-  },
-  legendScroll: {
-    gap: 8,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: colors.card,
-    borderWidth: 2,
-    gap: 6,
-  },
-  legendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  legendText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.text,
-  },
   currentUserContainer: {
     marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 16,
+    marginBottom: 12,
+    padding: 12,
     backgroundColor: colors.card,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 2,
     borderColor: colors.primary,
   },
   currentUserTitle: {
     fontSize: 10,
     fontWeight: '800',
-    color: colors.textSecondary,
-    letterSpacing: 2,
-    marginBottom: 12,
+    color: colors.primary,
+    letterSpacing: 1,
+    marginBottom: 8,
   },
   currentUserStats: {
     flexDirection: 'row',
@@ -441,15 +317,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   currentUserStatValue: {
-    fontSize: 24,
+    fontSize: 16,
     fontWeight: '900',
     color: colors.primary,
-  },
-  currentUserStatLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    marginTop: 4,
   },
   scrollView: {
     flex: 1,
@@ -458,22 +328,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '800',
     color: colors.textSecondary,
-    letterSpacing: 2,
+    letterSpacing: 1.5,
     marginBottom: 12,
   },
   rankingCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 10,
+    padding: 12,
     marginBottom: 8,
     borderWidth: 1,
     borderColor: colors.secondary,
-    gap: 12,
+    gap: 10,
   },
   currentUserCard: {
     borderWidth: 2,
@@ -481,9 +351,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
   },
   rankBadge: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
@@ -494,7 +364,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
   },
   rankNumber: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '900',
     color: colors.text,
   },
@@ -504,11 +374,11 @@ const styles = StyleSheet.create({
   userNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 6,
+    gap: 6,
+    marginBottom: 4,
   },
   userName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
     color: colors.text,
   },
@@ -517,49 +387,49 @@ const styles = StyleSheet.create({
   },
   youBadge: {
     backgroundColor: colors.primary,
-    paddingHorizontal: 6,
+    paddingHorizontal: 5,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: 3,
   },
   youBadgeText: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '800',
     color: colors.background,
   },
   classificationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   classificationBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
   },
   classificationText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     color: colors.background,
   },
   divisionText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
     color: colors.textSecondary,
   },
   statsColumn: {
     alignItems: 'flex-end',
-    gap: 4,
+    gap: 2,
   },
   statItem: {
     alignItems: 'flex-end',
   },
   statValue: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
     color: colors.primary,
   },
   statLabel: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '600',
     color: colors.textSecondary,
   },
@@ -576,26 +446,25 @@ const styles = StyleSheet.create({
   infoSection: {
     flexDirection: 'row',
     backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 24,
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 16,
     borderWidth: 1,
     borderColor: colors.primary,
-    gap: 12,
+    gap: 10,
   },
   infoTextContainer: {
     flex: 1,
   },
   infoTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
     color: colors.text,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   infoText: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textSecondary,
-    lineHeight: 20,
-    marginBottom: 8,
+    lineHeight: 18,
   },
 });

@@ -83,7 +83,7 @@ export default function SubmissionGuideScreen() {
               {'\n'}
               Email: info@tmsofast.com
               {'\n'}
-              Website: https://teamsofast.com
+              Website: https://www.tmsofast.com
               {'\n\n'}
               Last Updated: {new Date().toLocaleDateString()}
             </Text>
@@ -128,7 +128,7 @@ export default function SubmissionGuideScreen() {
               {'\n'}
               We typically respond within 24 hours.
               {'\n\n'}
-              Website: https://teamsofast.com
+              Website: https://www.tmsofast.com
             </Text>
           </View>
         </View>
@@ -162,7 +162,7 @@ export default function SubmissionGuideScreen() {
         {/* Website Link */}
         <TouchableOpacity 
           style={styles.websiteCard}
-          onPress={() => openURL('https://teamsofast.com')}
+          onPress={() => openURL('https://www.tmsofast.com')}
         >
           <IconSymbol 
             ios_icon_name="globe" 
@@ -172,7 +172,7 @@ export default function SubmissionGuideScreen() {
           />
           <View style={styles.websiteContent}>
             <Text style={styles.websiteTitle}>Visit Our Website</Text>
-            <Text style={styles.websiteUrl}>teamsofast.com</Text>
+            <Text style={styles.websiteUrl}>www.tmsofast.com</Text>
           </View>
           <IconSymbol 
             ios_icon_name="arrow.up.right" 
