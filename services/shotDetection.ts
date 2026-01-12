@@ -8,33 +8,39 @@ export interface ShotDetectionResult {
 }
 
 export class ShotDetector {
-  private audioThreshold = 0.7; // Normalized audio level threshold
-  private gyroThreshold = 2.5; // Gyroscope magnitude threshold
-  private minTimeBetweenShots = 100; // Minimum ms between shots
+  private audioThreshold = 0.55; // Lowered threshold for better sensitivity
+  private gyroThreshold = 2.0; // Lowered threshold for better recoil detection
+  private minTimeBetweenShots = 80; // Reduced to allow faster shot detection
   private lastShotTime = 0;
   private audioLevels: number[] = [];
   private isMonitoring = false;
+  private adaptiveThreshold = 0.55; // Dynamic threshold that adapts to environment
 
   constructor() {
-    console.log('ShotDetector initialized');
+    console.log('ShotDetector initialized with improved sensitivity');
   }
 
-  // Process audio data for muzzle blast detection
+  // Process audio data for muzzle blast detection with adaptive threshold
   processAudioLevel(level: number): ShotDetectionResult | null {
     if (!this.isMonitoring) return null;
 
     this.audioLevels.push(level);
     
-    // Keep only last 10 samples for baseline
-    if (this.audioLevels.length > 10) {
+    // Keep only last 20 samples for better baseline calculation
+    if (this.audioLevels.length > 20) {
       this.audioLevels.shift();
     }
 
-    // Calculate baseline average
+    // Calculate baseline average and standard deviation
     const baseline = this.audioLevels.reduce((a, b) => a + b, 0) / this.audioLevels.length;
+    const variance = this.audioLevels.reduce((sum, val) => sum + Math.pow(val - baseline, 2), 0) / this.audioLevels.length;
+    const stdDev = Math.sqrt(variance);
     
-    // Detect spike above baseline
-    if (level > baseline * 2 && level > this.audioThreshold) {
+    // Adaptive threshold: baseline + 2 standard deviations
+    this.adaptiveThreshold = Math.max(this.audioThreshold, baseline + (stdDev * 2));
+    
+    // Detect spike above adaptive threshold
+    if (level > this.adaptiveThreshold && level > baseline * 1.8) {
       const now = Date.now();
       
       // Debounce - ignore if too soon after last shot
@@ -43,11 +49,11 @@ export class ShotDetector {
       }
 
       this.lastShotTime = now;
-      console.log(`Audio shot detected: level=${level.toFixed(2)}, baseline=${baseline.toFixed(2)}`);
+      console.log(`Audio shot detected: level=${level.toFixed(2)}, baseline=${baseline.toFixed(2)}, threshold=${this.adaptiveThreshold.toFixed(2)}`);
       
       return {
         timestamp: now,
-        confidence: Math.min(level / this.audioThreshold, 1),
+        confidence: Math.min(level / this.adaptiveThreshold, 1),
         method: 'audio'
       };
     }
@@ -55,12 +61,13 @@ export class ShotDetector {
     return null;
   }
 
-  // Process gyroscope data for recoil detection
+  // Process gyroscope data for recoil detection with improved sensitivity
   processGyroData(x: number, y: number, z: number): ShotDetectionResult | null {
     if (!this.isMonitoring) return null;
 
-    // Calculate magnitude of rotation
-    const magnitude = Math.sqrt(x * x + y * y + z * z);
+    // Calculate magnitude of rotation with emphasis on vertical recoil (y-axis)
+    // Most pistol recoil is upward, so weight y-axis more heavily
+    const magnitude = Math.sqrt(x * x + (y * 1.5) * (y * 1.5) + z * z);
 
     if (magnitude > this.gyroThreshold) {
       const now = Date.now();
@@ -71,7 +78,7 @@ export class ShotDetector {
       }
 
       this.lastShotTime = now;
-      console.log(`Gyro shot detected: magnitude=${magnitude.toFixed(2)}`);
+      console.log(`Gyro shot detected: magnitude=${magnitude.toFixed(2)} (x=${x.toFixed(2)}, y=${y.toFixed(2)}, z=${z.toFixed(2)})`);
       
       return {
         timestamp: now,

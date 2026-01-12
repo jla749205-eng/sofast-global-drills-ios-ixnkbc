@@ -690,13 +690,19 @@ const styles = StyleSheet.create({
   cameraContainer: {
     flex: 1,
     backgroundColor: colors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   camera: {
-    flex: 1,
+    width: '100%',
+    aspectRatio: 3 / 4, // Rectangular aspect ratio (portrait)
   },
   targetGuide: {
-    flex: 1,
-    margin: 40,
+    position: 'absolute',
+    top: '10%',
+    left: '10%',
+    right: '10%',
+    bottom: '10%',
     borderWidth: 2,
     borderColor: colors.primary,
     borderStyle: 'dashed',
@@ -732,7 +738,8 @@ const styles = StyleSheet.create({
     borderRightWidth: 4,
   },
   preview: {
-    flex: 1,
+    width: '100%',
+    aspectRatio: 3 / 4, // Match camera aspect ratio
     backgroundColor: colors.background,
   },
   controls: {

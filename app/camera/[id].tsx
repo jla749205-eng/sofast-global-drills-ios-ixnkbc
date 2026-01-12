@@ -77,9 +77,9 @@ export default function CameraScreen() {
 
   const setupSensors = async () => {
     try {
-      console.log('Setting up sensors for shot detection');
+      console.log('Setting up sensors for improved shot detection with adaptive thresholds');
       
-      // Setup gyroscope
+      // Setup gyroscope with faster update rate for better recoil detection
       Gyroscope.setUpdateInterval(16);
       
       gyroSubscriptionRef.current = Gyroscope.addListener(gyroscopeData => {
