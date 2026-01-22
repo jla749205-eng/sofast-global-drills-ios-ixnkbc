@@ -1,3 +1,4 @@
+
 {
   "expo": {
     "name": "SOFAST Global Drills",
@@ -21,6 +22,9 @@
         "NSCameraUsageDescription": "SOFAST Global needs camera access to record your shooting drills and analyze your performance.",
         "NSMicrophoneUsageDescription": "SOFAST Global needs microphone access to detect shots and provide accurate timing.",
         "NSMotionUsageDescription": "SOFAST Global uses motion sensors to detect recoil and analyze your shooting form."
+      },
+      "entitlements": {
+        "com.apple.developer.game-center": true
       }
     },
     "android": {
