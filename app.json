@@ -1,4 +1,3 @@
-
 {
   "expo": {
     "name": "SOFAST Global Drills",
@@ -70,7 +69,7 @@
         }
       ]
     ],
-    "scheme": "sofastglobal",
+    "scheme": "SOFAST Global Drills",
     "experiments": {
       "typedRoutes": true
     },
